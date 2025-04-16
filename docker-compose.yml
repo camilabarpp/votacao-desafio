@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:14
+    ports:
+      - "5431:5432"
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: votacao
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - pg-config:/etc/postgresql
+      - ./src/main/resources/db/migration:/docker-entrypoint-initdb.d
+
+volumes:
+  pg-data:
+  pg-config:
