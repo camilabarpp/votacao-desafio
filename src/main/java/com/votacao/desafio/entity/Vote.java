@@ -11,24 +11,34 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "pautas")
-@EntityListeners(AuditingEntityListener.class)
+@Table(name = "votos")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Data
-public class Pauta {
+@EntityListeners(AuditingEntityListener.class)
+public class Vote {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title")
-    private String title;
+    @ManyToOne
+    @JoinColumn(name = "voting_session_id")
+    private VotingSession votingSession;
 
-    @Column(name = "description")
-    private String description;
+    @Column(name = "associated_id")
+    private String associatedId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "voted_option")
+    private VoteOption votedOption;
 
     @CreatedDate
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Column(name = "voted_at")
+    private LocalDateTime votedAt;
+
+    public enum VoteOption {
+        YES,
+        NO
+    }
 }

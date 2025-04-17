@@ -14,15 +14,21 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Data
-public class SessaoVotacao {
+public class VotingSession {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
+    @JoinColumn(name = "pauta_id")
     private Pauta pauta;
 
-    private LocalDateTime inicioSessao;
-    private LocalDateTime fimSessao;
-    private boolean sessaoAberta;
+    @Column(name = "voting_session_started_at")
+    private LocalDateTime votingSessionStartedAt;
+
+    @Column(name = "voting_session_ended_at")
+    private LocalDateTime votingSessionEndedAt;
+
+    @Column(name = "voting_session_open")
+    private boolean votingSessionOpen;
 }
