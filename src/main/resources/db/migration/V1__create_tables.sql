@@ -17,7 +17,6 @@ CREATE TABLE IF NOT EXISTS sessoes_votacao (
     pauta_id BIGINT NOT NULL,
     voting_session_started_at TIMESTAMP NOT NULL,
     voting_session_ended_at TIMESTAMP NOT NULL,
-    voting_session_open BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_sessao_pauta
         FOREIGN KEY (pauta_id)
