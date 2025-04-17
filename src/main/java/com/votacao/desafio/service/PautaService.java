@@ -69,7 +69,7 @@ public class PautaService {
         }
 
         if (!votingSession.isVotingSessionOpen()) {
-            log.error("Voting session {} open", votingSession.getId());
+            log.error("Voting session {} is closed", votingSession.getId());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Voting session is closed");
         }
 
