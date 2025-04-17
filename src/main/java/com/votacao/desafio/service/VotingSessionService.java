@@ -28,7 +28,7 @@ public class VotingSessionService {
     public Page<VotingSession> listAllVotingSessions(Integer page, Integer size) {
         log.info("Listing all Voting Sessions");
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        return votingSessionRepository.findAll(pageable);
+        return votingSessionRepository.listAllVotingSessionsOpen(pageable);
     }
 
     @Transactional(readOnly = true)
@@ -50,7 +50,6 @@ public class VotingSessionService {
                 .pauta(pauta)
                 .votingSessionStartedAt(LocalDateTime.now())
                 .votingSessionEndedAt(LocalDateTime.now().plusMinutes(durationInMinutes))
-                .votingSessionOpen(true)
                 .build());
     }
 }

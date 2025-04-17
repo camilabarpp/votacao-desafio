@@ -15,13 +15,12 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class VotingSessionResponse {
+public class VotingSessionListResponse {
     private Long id;
     private Pauta pauta;
     private LocalDateTime votingSessionStartedAt;
     private LocalDateTime votingSessionEndedAt;
     private boolean votingSessionOpen;
-    private List<Vote> votes;
 
     private Integer votesCount;
 
@@ -29,7 +28,7 @@ public class VotingSessionResponse {
 
     private Integer votesCountNo;
 
-    public static VotingSessionResponse toResponse(VotingSession votingSession) {
+    public static VotingSessionListResponse toResponse(VotingSession votingSession) {
         List<Vote> votes = votingSession.getVotes();
         int votesCountYes = (int) votes.stream()
                 .filter(vote -> vote.getVotedOption() == Vote.VoteOption.YES)
@@ -38,13 +37,12 @@ public class VotingSessionResponse {
                 .filter(vote -> vote.getVotedOption() == Vote.VoteOption.NO)
                 .count();
 
-        return VotingSessionResponse.builder()
+        return VotingSessionListResponse.builder()
                 .id(votingSession.getId())
                 .pauta(votingSession.getPauta())
                 .votingSessionStartedAt(votingSession.getVotingSessionStartedAt())
                 .votingSessionEndedAt(votingSession.getVotingSessionEndedAt())
                 .votingSessionOpen(votingSession.isVotingSessionOpen())
-                .votes(votes)
                 .votesCount(votes.size())
                 .votesCountYes(votesCountYes)
                 .votesCountNo(votesCountNo)
