@@ -2,9 +2,13 @@ package com.votacao.desafio.service;
 
 import com.votacao.desafio.dto.PautaRequest;
 import com.votacao.desafio.dto.VoteRequest;
+import com.votacao.desafio.entity.Associate;
 import com.votacao.desafio.entity.Pauta;
+import com.votacao.desafio.entity.Vote;
 import com.votacao.desafio.entity.VotingSession;
+import com.votacao.desafio.repository.AssociateRepository;
 import com.votacao.desafio.repository.PautaRepository;
+import com.votacao.desafio.repository.VoteRepository;
 import com.votacao.desafio.repository.VotingSessionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +30,8 @@ public class VotacaoService {
 
     private final PautaRepository pautaRepository;
     private final VotingSessionRepository votingSessionRepository;
+    private final AssociateRepository associateRepository;
+    private final VoteRepository voteRepository;
 
     @Transactional
     public Pauta createPauta(PautaRequest pautaRequest) {
@@ -60,6 +66,13 @@ public class VotacaoService {
         log.info("Registering vote for Pauta with ID: {}", pautaId);
         Pauta pauta = getPautaById(pautaId);
         VotingSession votingSession = getSessaoVotacao(pauta.getId());
+        Associate associate = associateRepository.findById(voteRequest.getAssociatedId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Associate not found"));
+
+        boolean associateVoted = votingSession.getVotes().stream().anyMatch(vote -> vote.getAssociateId().equals(associate.getId()));
+        if (associateVoted) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Associate already voted");
+        }
 
         if (!votingSession.isVotingSessionOpen()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Voting session is closed");
@@ -71,6 +84,15 @@ public class VotacaoService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Voting session has ended");
         }
 
+        Vote vote = Vote.builder()
+                .votingSession(votingSession)
+                .associateId(associate.getId())
+                .votedOption(voteRequest.getVote())
+                .build();
+        voteRepository.save(vote);
+
+        votingSession.getVotes().add(vote);
+        votingSessionRepository.save(votingSession);
 
     }
 

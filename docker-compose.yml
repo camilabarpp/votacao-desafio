@@ -10,7 +10,6 @@ services:
     volumes:
       - pg-data:/var/lib/postgresql/data
       - pg-config:/etc/postgresql
-      - ./src/main/resources/db/migration:/docker-entrypoint-initdb.d
 
 volumes:
   pg-data:
