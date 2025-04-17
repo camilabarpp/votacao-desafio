@@ -74,7 +74,6 @@ public class PautaService {
         }
 
         if (votingSession.getVotingSessionEndedAt().isBefore(LocalDateTime.now())) {
-            votingSession.setVotingSessionOpen(false);
             votingSessionRepository.save(votingSession);
             log.error("Voting session {} has ended", votingSession.getId());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Voting session has ended");
@@ -93,7 +92,7 @@ public class PautaService {
     }
 
     private VotingSession getSessaoVotacao(Long pautaId) {
-        return votingSessionRepository.findByPauta_Id(pautaId)
+        return votingSessionRepository.findNonExpiredByPautaId(pautaId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Voting session not found"));
     }
 
