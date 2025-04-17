@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "sessoes_votacao")
@@ -31,4 +33,7 @@ public class VotingSession {
 
     @Column(name = "voting_session_open")
     private boolean votingSessionOpen;
+
+    @OneToMany(mappedBy = "votingSession", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Vote> votes = new ArrayList<>();
 }
