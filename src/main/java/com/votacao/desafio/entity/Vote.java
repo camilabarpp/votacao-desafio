@@ -1,5 +1,6 @@
 package com.votacao.desafio.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +25,7 @@ public class Vote {
 
     @ManyToOne
     @JoinColumn(name = "voting_session_id")
+    @JsonBackReference
     private VotingSession votingSession;
 
     @Column(name = "associated_id")

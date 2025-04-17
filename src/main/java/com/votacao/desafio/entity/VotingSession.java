@@ -1,5 +1,6 @@
 package com.votacao.desafio.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,14 +35,16 @@ public class VotingSession {
     @Column(name = "voting_session_ended_at")
     private LocalDateTime votingSessionEndedAt;
 
-    @Column(name = "voting_session_open")
-    private boolean votingSessionOpen;
-
     @Builder.Default
     @OneToMany(mappedBy = "votingSession", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference
     private List<Vote> votes = new ArrayList<>();
 
     @CreatedDate
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    public boolean isVotingSessionOpen() {
+        return votingSessionEndedAt.isAfter(LocalDateTime.now());
+    }
 }
