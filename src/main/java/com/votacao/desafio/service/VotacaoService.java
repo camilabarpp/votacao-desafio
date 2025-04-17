@@ -66,7 +66,7 @@ public class VotacaoService {
         log.info("Registering vote for Pauta with ID: {}", pautaId);
         Pauta pauta = getPautaById(pautaId);
         VotingSession votingSession = getSessaoVotacao(pauta.getId());
-        Associate associate = associateRepository.findById(Long.valueOf(voteRequest.getAssociatedId()))
+        Associate associate = associateRepository.findById(voteRequest.getAssociatedId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Associate not found"));
 
         boolean associateVoted = votingSession.getVotes().stream().anyMatch(vote -> vote.getAssociateId().equals(associate.getId()));
