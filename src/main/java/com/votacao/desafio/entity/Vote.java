@@ -27,7 +27,7 @@ public class Vote {
     private VotingSession votingSession;
 
     @Column(name = "associated_id")
-    private String associatedId;
+    private Long associateId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "voted_option")

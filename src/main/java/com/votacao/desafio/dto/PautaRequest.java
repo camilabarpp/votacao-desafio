@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotNull;
 
 @Getter
 public class PautaRequest {
-    @NotNull(message = "Título é obrigatório")
+    @NotNull(message = "Title is required")
     private String title;
-    @NotNull(message = "Descrição é obrigatória")
+    @NotNull(message = "Description is required")
     private String description;
 }

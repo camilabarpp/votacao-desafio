@@ -1,5 +1,3 @@
-CREATE TYPE voting_option AS ENUM ('YES', 'NO');
-
 CREATE TABLE IF NOT EXISTS pautas (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
@@ -29,7 +27,7 @@ CREATE TABLE IF NOT EXISTS votos (
     id SERIAL PRIMARY KEY,
     voting_session_id BIGINT NOT NULL,
     associated_id VARCHAR(255) NOT NULL,
-    voted_option voting_option NOT NULL,
+    voted_option VARCHAR(10) NOT NULL,
     voted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_voto_sessao
         FOREIGN KEY (voting_session_id)

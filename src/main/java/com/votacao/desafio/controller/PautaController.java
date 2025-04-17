@@ -2,6 +2,7 @@ package com.votacao.desafio.controller;
 
 import com.votacao.desafio.dto.PautaRequest;
 import com.votacao.desafio.dto.PautaResponse;
+import com.votacao.desafio.dto.VoteRequest;
 import com.votacao.desafio.entity.Pauta;
 import com.votacao.desafio.entity.VotingSession;
 import com.votacao.desafio.service.VotacaoService;
@@ -37,15 +38,16 @@ public class PautaController {
     @PostMapping("/{id}/sessao")
     public ResponseEntity<VotingSession> openVotingSession(@PathVariable Long id,
                                                            @RequestParam(value = "sessionDuration", defaultValue = "1") Integer  sessionDuration) {
-        VotingSession sessaoVotacao = votacaoService.openVotingSession(id, sessionDuration);
-        return ResponseEntity.status(201).body(sessaoVotacao);
+        VotingSession openVotingSession = votacaoService.openVotingSession(id, sessionDuration);
+        return ResponseEntity.status(201).body(openVotingSession);
     }
-//
-//    @PostMapping("/{id}/votos")
-//    public ResponseEntity<Void> votar(@PathVariable Long id,
-//                                      @RequestBody VotoRequest votoRequest) {
-//        // implementação
-//    }
+
+    @PostMapping("/{pautaId}/votos")
+    public ResponseEntity<Void> registerVote(@PathVariable Long pautaId,
+                                             @RequestBody VoteRequest voteRequest) {
+        votacaoService.registerVote(pautaId, voteRequest);
+        return ResponseEntity.status(201).build();
+    }
 //
 //    @GetMapping("/{id}/resultado")
 //    public ResponseEntity<ResultadoVotacaoDTO> resultado(@PathVariable Long id) {

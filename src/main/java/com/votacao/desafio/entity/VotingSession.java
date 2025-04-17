@@ -34,6 +34,6 @@ public class VotingSession {
     @Column(name = "voting_session_open")
     private boolean votingSessionOpen;
 
-    @OneToMany(mappedBy = "votingSession", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "votingSession", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Vote> votes = new ArrayList<>();
 }
