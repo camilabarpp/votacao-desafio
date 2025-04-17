@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class VotacaoService {
+public class PautaService {
 
     private final PautaRepository pautaRepository;
     private final VotingSessionRepository votingSessionRepository;
@@ -49,16 +49,9 @@ public class VotacaoService {
         return pautaRepository.findAll(pageable);
     }
 
-    @Transactional
-    public VotingSession openVotingSession(Long pautaId, Integer durationInMinutes) {
-        log.info("Opening voting session for Pauta with ID: {}", pautaId);
-        Pauta pauta = getPautaById(pautaId);
-        return votingSessionRepository.save(VotingSession.builder()
-                .pauta(pauta)
-                .votingSessionStartedAt(LocalDateTime.now())
-                .votingSessionEndedAt(LocalDateTime.now().plusMinutes(durationInMinutes))
-                .votingSessionOpen(true)
-                .build());
+    public Pauta getPautaById(Long pautaId) {
+        return pautaRepository.findById(pautaId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pauta not found"));
     }
 
     @Transactional
@@ -71,16 +64,19 @@ public class VotacaoService {
 
         boolean associateVoted = votingSession.getVotes().stream().anyMatch(vote -> vote.getAssociateId().equals(associate.getId()));
         if (associateVoted) {
+            log.error("Associate {} already voted", associate.getId());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Associate already voted");
         }
 
         if (!votingSession.isVotingSessionOpen()) {
+            log.error("Voting session {} open", votingSession.getId());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Voting session is closed");
         }
 
         if (votingSession.getVotingSessionEndedAt().isBefore(LocalDateTime.now())) {
             votingSession.setVotingSessionOpen(false);
             votingSessionRepository.save(votingSession);
+            log.error("Voting session {} has ended", votingSession.getId());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Voting session has ended");
         }
 
@@ -99,11 +95,6 @@ public class VotacaoService {
     private VotingSession getSessaoVotacao(Long pautaId) {
         return votingSessionRepository.findByPauta_Id(pautaId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Voting session not found"));
-    }
-
-    private Pauta getPautaById(Long pautaId) {
-        return pautaRepository.findById(pautaId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pauta not found"));
     }
 
 }
