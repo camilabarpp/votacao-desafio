@@ -71,10 +71,6 @@ public class VotingSessionService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Voting Session not found"));
     }
 
-    public Page<VotingSession> findAll(Pageable pageable) {
-        return votingSessionRepository.findAll(pageable);
-    }
-
     @Transactional(readOnly = true)
     public Page<VotingSession> listAllVotingSessionsOpen(Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "votingSessionStartedAt"));
@@ -97,27 +93,18 @@ public class VotingSessionService {
                 .build());
     }
 
-    public Page<VotingSessionResponse> listAllVotingSessions(String votingSessionStatus, Integer page, Integer size) {
-        if (votingSessionStatus == null) votingSessionStatus = "";
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<VotingSessionResponse> listAllVotingSessions(String status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "votingSessionStartedAt"));
+        Page<VotingSession> votingSessions;
 
-        if (!votingSessionStatus.isEmpty()) {
-            switch (votingSessionStatus) {
-                case "OPEN" -> {
-                    return votingSessionRepository.listAllVotingSessionsOpen(LocalDateTime.now(), pageable)
-                            .map(VotingSessionResponse::mapToVotingSessionResponse);
-                }
-                case "CLOSED" -> {
-                    return votingSessionRepository.listAllVotingSessionsClosed(LocalDateTime.now(), pageable)
-                            .map(VotingSessionResponse::mapToVotingSessionResponse);
-                }
-                default -> {
-                    return findAll(pageable)
-                            .map(VotingSessionResponse::mapToVotingSessionResponse);
-                }
-            }
+        if ("OPEN".equalsIgnoreCase(status)) {
+            votingSessions = votingSessionRepository.listAllVotingSessionsOpen(LocalDateTime.now(), pageable);
+        } else if ("CLOSED".equalsIgnoreCase(status)) {
+            votingSessions = votingSessionRepository.listAllVotingSessionsClosed(LocalDateTime.now(), pageable);
+        } else {
+            votingSessions = votingSessionRepository.findAll(pageable);
         }
-        return findAll(pageable)
-                .map(VotingSessionResponse::mapToVotingSessionResponse);
+
+        return votingSessions.map(VotingSessionResponse::mapToVotingSessionResponse);
     }
 }
