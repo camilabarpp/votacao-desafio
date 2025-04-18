@@ -1,43 +1,23 @@
 package com.votacao.desafio.controller;
 
-import com.votacao.desafio.dto.*;
+import com.votacao.desafio.dto.VoteRequest;
+import com.votacao.desafio.dto.VotingResultResponse;
+import com.votacao.desafio.dto.VotingSessionResponse;
 import com.votacao.desafio.service.VotacaoService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/votacao")
+@RequiredArgsConstructor
 public class VotacaoController {
 
-    @Autowired
-    private VotacaoService votacaoService;
-
-    @PostMapping("/pauta")
-    public ResponseEntity<PautaResponse> createPauta(@RequestBody PautaRequest pautaRequest) {
-        PautaResponse pautaResponse = votacaoService.createPauta(pautaRequest);
-        return ResponseEntity.ok(pautaResponse);
-    }
-
-    @GetMapping("/pauta")
-    public ResponseEntity<Page<PautaResponse>> listAllPautas(
-            @RequestParam(required = false) String status,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Page<PautaResponse> pautas = votacaoService.listAllPautas(status, page, size);
-        return ResponseEntity.ok(pautas);
-    }
-
-    @GetMapping("/pauta/{pautaId}")
-    public ResponseEntity<PautaResponse> getPautaById(@PathVariable Long pautaId) {
-        PautaResponse pauta = votacaoService.getPautaById(pautaId);
-        return ResponseEntity.ok(pauta);
-    }
+    private final VotacaoService votacaoService;
 
     @PostMapping("/pauta/{pautaId}/sessao")
     public ResponseEntity<VotingSessionResponse> openVotingSessionByPautaId(@PathVariable Long pautaId,
-    @RequestParam(defaultValue = "1") Integer votingSessionDurationInMinutes) {
+                                                                            @RequestParam(defaultValue = "1") Integer votingSessionDurationInMinutes) {
         VotingSessionResponse openedSession = votacaoService.openVotingSessionByPautaId(pautaId, votingSessionDurationInMinutes);
         return ResponseEntity.ok(openedSession);
     }

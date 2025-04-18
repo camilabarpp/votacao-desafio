@@ -1,19 +1,17 @@
 package com.votacao.desafio.service;
 
-import com.votacao.desafio.dto.*;
+import com.votacao.desafio.dto.VoteRequest;
+import com.votacao.desafio.dto.VoteResponse;
+import com.votacao.desafio.dto.VotingResultResponse;
+import com.votacao.desafio.dto.VotingSessionResponse;
 import com.votacao.desafio.entity.Associate;
 import com.votacao.desafio.entity.Pauta;
 import com.votacao.desafio.entity.Vote;
 import com.votacao.desafio.entity.VotingSession;
-import com.votacao.desafio.repository.AssociateRepository;
 import com.votacao.desafio.repository.PautaRepository;
 import com.votacao.desafio.repository.VoteRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,53 +33,9 @@ public class VotacaoService {
     private final PautaService pautaService;
     private final AssociateService associateService;
 
-    public Page<PautaResponse> listAllPautas(String status, Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        if (status == null) status = "";
-
-        if (!status.isEmpty()) {
-            switch (status) {
-                case "OPEN" -> {
-                    return votingsessionService.listAllVotingSessionsOpen(page, size)
-                            .map(PautaResponse::mapToPautaResponse);
-                }
-                case "CLOSED" -> {
-                    return votingsessionService.listAllVotingSessionsClosed(page, size)
-                            .map(PautaResponse::mapToPautaResponse);
-                }
-
-                default -> {
-                    return pautaRepository.findAll(pageable)
-                            .map(PautaResponse::mapToPautaResponse);
-                }
-            }
-        }
-
-        return pautaRepository.findAll(pageable)
-                .map(PautaResponse::mapToPautaResponse);
-    }
-
-    public PautaResponse getPautaById(Long pautaId) {
-        Pauta pauta = pautaRepository.findById(pautaId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pauta not found with ID: " + pautaId));
-
-        return PautaResponse.mapToPautaResponse(pauta);
-    }
-
     public VotingSessionResponse getVotingSessionById(Long votingSessionId) {
         VotingSession currentVotingSession = votingsessionService.getVotingSessionById(votingSessionId);
         return mapToVotingSessionResponse(currentVotingSession);
-    }
-
-    public PautaResponse createPauta(PautaRequest pautaRequest) {
-        log.info("Creating new Pauta with title: {}", pautaRequest.getTitle());
-        Pauta pauta = Pauta.builder()
-                .title(pautaRequest.getTitle())
-                .description(pautaRequest.getDescription())
-                .build();
-
-        Pauta savedPauta = pautaRepository.save(pauta);
-        return PautaResponse.mapToPautaResponse(savedPauta);
     }
 
     public VotingSessionResponse openVotingSessionByPautaId(Long pautaId, Integer votingSessionDurationInMinutes) {
