@@ -1,6 +1,5 @@
 package com.votacao.desafio.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,36 +10,38 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "votos")
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Data
+@Builder
+@Entity
 @EntityListeners(AuditingEntityListener.class)
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "votos", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"sessao_id", "associado_id"})
+})
 public class Vote {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "voting_session_id")
-    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sessao_id", nullable = false)
     private VotingSession votingSession;
 
-    @Column(name = "associated_id")
-    private Long associateId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "associado_id", nullable = false)
+    private Associate associate;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "voted_option")
-    private VoteOption votedOption;
+    @Column(name = "opcao_voto", nullable = false, length = 3)
+    private VoteOption voteOption;
 
     @CreatedDate
-    @Column(name = "voted_at")
+    @Column(name = "data_voto")
     private LocalDateTime votedAt;
 
     public enum VoteOption {
-        YES,
-        NO
+        YES, NO
     }
 }

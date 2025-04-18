@@ -1,6 +1,5 @@
 package com.votacao.desafio.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,41 +9,50 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "sessoes_votacao")
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Data
+@Entity
+@Builder
+@Table(name = "sessao_votos")
 @EntityListeners(AuditingEntityListener.class)
+@AllArgsConstructor
+@NoArgsConstructor
 public class VotingSession {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "pauta_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pauta_id", nullable = false, unique = true)
     private Pauta pauta;
 
-    @Column(name = "voting_session_started_at")
+    @CreatedDate
+    @Column(name = "data_inicio")
     private LocalDateTime votingSessionStartedAt;
 
-    @Column(name = "voting_session_ended_at")
+    @Column(name = "data_fim")
     private LocalDateTime votingSessionEndedAt;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "votingSession", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonManagedReference
-    private List<Vote> votes = new ArrayList<>();
+    @OneToMany(mappedBy = "votingSession", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Vote> votes;
 
-    @CreatedDate
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    public VotingSessionStatus getVotingSessionStatus() {
+        LocalDateTime now = LocalDateTime.now();
 
-    public boolean isVotingSessionOpen() {
-        return votingSessionEndedAt.isAfter(LocalDateTime.now());
+        boolean hasStarted = votingSessionStartedAt != null && votingSessionStartedAt.isBefore(now);
+        boolean isStillOpen = votingSessionEndedAt == null || votingSessionEndedAt.isAfter(now);
+
+        if (hasStarted && isStillOpen) {
+            return VotingSessionStatus.OPEN;
+        } else {
+            return VotingSessionStatus.CLOSED;
+        }
+    }
+
+    public enum VotingSessionStatus {
+        OPEN,
+        CLOSED
     }
 }

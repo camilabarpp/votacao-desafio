@@ -6,10 +6,8 @@ import lombok.Getter;
 
 @Getter
 public class VoteRequest {
-    @NotNull(message = "Session ID is required")
-    private Long sessionId;
-    @NotNull(message = "Associate ID is required")
-    private Long associatedId;
+    @NotNull(message = "Associate CPF is required")
+    private String cpf;
     @NotNull(message = "Vote is required")
     private Vote.VoteOption vote;
 }

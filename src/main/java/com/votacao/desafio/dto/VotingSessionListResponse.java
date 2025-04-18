@@ -20,7 +20,7 @@ public class VotingSessionListResponse {
     private Pauta pauta;
     private LocalDateTime votingSessionStartedAt;
     private LocalDateTime votingSessionEndedAt;
-    private boolean votingSessionOpen;
+    private String votingSessionStatus;
 
     private Integer votesCount;
 
@@ -31,10 +31,10 @@ public class VotingSessionListResponse {
     public static VotingSessionListResponse toResponse(VotingSession votingSession) {
         List<Vote> votes = votingSession.getVotes();
         int votesCountYes = (int) votes.stream()
-                .filter(vote -> vote.getVotedOption() == Vote.VoteOption.YES)
+                .filter(vote -> vote.getVoteOption().name().equals("YES"))
                 .count();
         int votesCountNo = (int) votes.stream()
-                .filter(vote -> vote.getVotedOption() == Vote.VoteOption.NO)
+                .filter(vote -> vote.getVoteOption().name().equals("NO"))
                 .count();
 
         return VotingSessionListResponse.builder()
@@ -42,7 +42,7 @@ public class VotingSessionListResponse {
                 .pauta(votingSession.getPauta())
                 .votingSessionStartedAt(votingSession.getVotingSessionStartedAt())
                 .votingSessionEndedAt(votingSession.getVotingSessionEndedAt())
-                .votingSessionOpen(votingSession.isVotingSessionOpen())
+                .votingSessionStatus(votingSession.getVotingSessionStatus().name())
                 .votesCount(votes.size())
                 .votesCountYes(votesCountYes)
                 .votesCountNo(votesCountNo)

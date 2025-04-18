@@ -1,6 +1,5 @@
 package com.votacao.desafio.dto;
 
-import com.votacao.desafio.entity.Pauta;
 import com.votacao.desafio.entity.Vote;
 import com.votacao.desafio.entity.VotingSession;
 import lombok.AllArgsConstructor;
@@ -17,37 +16,43 @@ import java.util.List;
 @NoArgsConstructor
 public class VotingSessionResponse {
     private Long id;
-    private Pauta pauta;
     private LocalDateTime votingSessionStartedAt;
     private LocalDateTime votingSessionEndedAt;
-    private boolean votingSessionOpen;
-    private List<Vote> votes;
+    private String votingSessionStatus;
+    @Builder.Default
+    private List<VoteResponse> votes = List.of();
+    @Builder.Default
+    private Integer votesCount = 0;
+    @Builder.Default
+    private Integer votesCountYes = 0;
+    @Builder.Default
+    private Integer votesCountNo = 0;
 
-    private Integer votesCount;
+    public static VotingSessionResponse mapToVotingSessionResponse(VotingSession votingSession) {
+        VotingSessionResponse response = new VotingSessionResponse();
+        response.setId(votingSession.getId());
+        response.setVotingSessionStartedAt(votingSession.getVotingSessionStartedAt());
+        response.setVotingSessionEndedAt(votingSession.getVotingSessionEndedAt());
+        response.setVotingSessionStatus(votingSession.getVotingSessionStatus().name());
 
-    private int votesCountYes;
+        if (votingSession.getVotes() != null) {
+            response.setVotes(votingSession.getVotes().stream()
+                    .map(VoteResponse::mapToVoteResponse)
+                    .toList());
+            List<Vote> votes = votingSession.getVotes();
+            response.setVotesCount(votes.size());
 
-    private Integer votesCountNo;
+            long yesVoteCount = votes.stream()
+                    .filter(vote -> "YES".equals(vote.getVoteOption().name()))
+                    .count();
+            response.setVotesCountYes((int) yesVoteCount);
 
-    public static VotingSessionResponse toResponse(VotingSession votingSession) {
-        List<Vote> votes = votingSession.getVotes();
-        int votesCountYes = (int) votes.stream()
-                .filter(vote -> vote.getVotedOption() == Vote.VoteOption.YES)
-                .count();
-        int votesCountNo = (int) votes.stream()
-                .filter(vote -> vote.getVotedOption() == Vote.VoteOption.NO)
-                .count();
+            long noVoteCount = votes.stream()
+                    .filter(vote -> "NO".equals(vote.getVoteOption().name()))
+                    .count();
+            response.setVotesCountNo((int) noVoteCount);
+        }
 
-        return VotingSessionResponse.builder()
-                .id(votingSession.getId())
-                .pauta(votingSession.getPauta())
-                .votingSessionStartedAt(votingSession.getVotingSessionStartedAt())
-                .votingSessionEndedAt(votingSession.getVotingSessionEndedAt())
-                .votingSessionOpen(votingSession.isVotingSessionOpen())
-                .votes(votes)
-                .votesCount(votes.size())
-                .votesCountYes(votesCountYes)
-                .votesCountNo(votesCountNo)
-                .build();
+        return response;
     }
 }

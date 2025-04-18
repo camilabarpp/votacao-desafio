@@ -1,33 +1,32 @@
 package com.votacao.desafio.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-@Entity
-@EntityListeners(AuditingEntityListener.class)
-@Table(name = "associados")
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
 @Data
+@Entity
+@Table(name = "associados")
+@EntityListeners(AuditingEntityListener.class)
 public class Associate {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "nome", nullable = false, length = 100)
     private String name;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "cpf", nullable = false, unique = true, length = 11)
     private String cpf;
 
+    @Column(name = "email", nullable = false, unique = true, length = 100)
+    private String email;
+
     @CreatedDate
+    @Column(name = "data_cadastro")
     private LocalDateTime createdAt;
 }

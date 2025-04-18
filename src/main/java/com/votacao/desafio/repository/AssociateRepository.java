@@ -8,8 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface AssociateRepository extends JpaRepository<Associate, Long> {
-
     Optional<Associate> findByCpf(String cpf);
-
-    boolean existsByCpf(String cpf);
 }
