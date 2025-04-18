@@ -5,6 +5,7 @@ import com.votacao.desafio.dto.PautaResponse;
 import com.votacao.desafio.service.PautaManagementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,7 @@ public class PautaController {
     @PostMapping()
     public ResponseEntity<PautaResponse> createPauta(@RequestBody PautaRequest pautaRequest) {
         PautaResponse pautaResponse = pautaManagementService.createPauta(pautaRequest);
-        return ResponseEntity.ok(pautaResponse);
+        return new ResponseEntity<>(pautaResponse, HttpStatus.CREATED);
     }
 
     @GetMapping()

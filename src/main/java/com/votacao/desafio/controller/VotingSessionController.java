@@ -5,6 +5,7 @@ import com.votacao.desafio.dto.VotingSessionResponse;
 import com.votacao.desafio.service.VotingSessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +28,7 @@ public class VotingSessionController {
     public ResponseEntity<VotingSessionResponse> openVotingSessionByPautaId(@PathVariable Long pautaId,
                                                                             @RequestParam(defaultValue = "1") Integer votingSessionDurationInMinutes) {
         VotingSessionResponse openedSession = votingSessionService.openVotingSessionByPautaId(pautaId, votingSessionDurationInMinutes);
-        return ResponseEntity.ok(openedSession);
+        return new ResponseEntity<>(openedSession, HttpStatus.CREATED);
     }
 
     @GetMapping("/{sessaoId}")
