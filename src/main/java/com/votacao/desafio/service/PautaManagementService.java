@@ -3,7 +3,6 @@ package com.votacao.desafio.service;
 import com.votacao.desafio.dto.PautaRequest;
 import com.votacao.desafio.dto.PautaResponse;
 import com.votacao.desafio.entity.Pauta;
-import com.votacao.desafio.repository.PautaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -18,9 +17,9 @@ import org.springframework.web.server.ResponseStatusException;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PautaService {
+public class PautaManagementService {
 
-    private final PautaRepository pautaRepository;
+    private final PautaQueryService pautaQueryService;
     private final VotingSessionService votingSessionService;
 
     @Transactional
@@ -31,21 +30,8 @@ public class PautaService {
                 .description(pautaRequest.getDescription())
                 .build();
 
-        Pauta savedPauta = pautaRepository.save(pauta);
+        Pauta savedPauta = pautaQueryService.save(pauta);
         return PautaResponse.mapToPautaResponse(savedPauta);
-    }
-
-    public PautaResponse getPautaResponseById(Long pautaId) {
-        Pauta pauta = pautaRepository.findById(pautaId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pauta not found with ID: " + pautaId));
-
-        return PautaResponse.mapToPautaResponse(pauta);
-    }
-
-    @Transactional
-    public Pauta getPautaById(Long pautaId) {
-        return pautaRepository.findById(pautaId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pauta not found with ID: " + pautaId));
     }
 
     @Transactional
@@ -65,13 +51,18 @@ public class PautaService {
                 }
 
                 default -> {
-                    return pautaRepository.findAll(pageable)
+                    return pautaQueryService.findAll(pageable)
                             .map(PautaResponse::mapToPautaResponse);
                 }
             }
         }
 
-        return pautaRepository.findAll(pageable)
+        return pautaQueryService.findAll(pageable)
                 .map(PautaResponse::mapToPautaResponse);
+    }
+
+    public PautaResponse getPautaResponseById(Long pautaId) {
+        Pauta pauta = pautaQueryService.getPautaById(pautaId);
+        return PautaResponse.mapToPautaResponse(pauta);
     }
 }
