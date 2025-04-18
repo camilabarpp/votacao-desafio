@@ -1,6 +1,5 @@
 package com.votacao.desafio.service;
 
-import com.votacao.desafio.dto.PautaResponse;
 import com.votacao.desafio.entity.Pauta;
 import com.votacao.desafio.entity.VotingSession;
 import com.votacao.desafio.repository.VotingSessionRepository;
@@ -23,18 +22,6 @@ import java.time.LocalDateTime;
 public class VotingSessionService {
 
     private final VotingSessionRepository votingSessionRepository;
-
-    //    private final PautaService pautaService;
-//    private final AssociateService associateService;
-//    private final VoteRepository voteRepository;
-//
-//    @Transactional(readOnly = true)
-//    public Page<VotingSession> listAllVotingSessionsOpen(Integer page, Integer size) {
-//        log.info("Listing all Voting Sessions");
-//        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-//        return votingSessionRepository.listAllVotingSessionsOpen(pageable);
-//    }
-//
 
     @Transactional(readOnly = true)
     public VotingSession getVotingSessionById(Long votingSessionId) {
