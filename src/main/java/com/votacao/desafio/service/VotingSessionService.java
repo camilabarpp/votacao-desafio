@@ -1,5 +1,7 @@
 package com.votacao.desafio.service;
 
+import com.votacao.desafio.dto.VotingResultResponse;
+import com.votacao.desafio.dto.VotingSessionResponse;
 import com.votacao.desafio.entity.Pauta;
 import com.votacao.desafio.entity.VotingSession;
 import com.votacao.desafio.repository.VotingSessionRepository;
@@ -16,16 +18,47 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 
+import static com.votacao.desafio.dto.VotingResultResponse.buildVotingResultResponse;
+import static com.votacao.desafio.dto.VotingSessionResponse.mapToVotingSessionResponse;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class VotingSessionService {
 
     private final VotingSessionRepository votingSessionRepository;
+    private final PautaQueryService pautaService;
 
     @Transactional(readOnly = true)
-    public VotingSession getVotingSessionById(Long votingSessionId) {
-        return findById(votingSessionId);
+    public VotingSessionResponse getVotingSessionById(Long votingSessionId) {
+        VotingSession currentVotingSession = findById(votingSessionId);
+        return mapToVotingSessionResponse(currentVotingSession);
+    }
+
+    public VotingSessionResponse openVotingSessionByPautaId(Long pautaId, Integer votingSessionDurationInMinutes) {
+        log.info("Opening voting session for Pauta with ID: {}", pautaId);
+        Pauta pauta = pautaService.getPautaById(pautaId);
+
+        if (pauta.getVotingSession() != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Voting session already exists for this Pauta");
+        }
+
+        VotingSession votingSession = openVotingSession(pauta, votingSessionDurationInMinutes);
+        return mapToVotingSessionResponse(votingSession);
+    }
+
+    public VotingResultResponse getVotingResult(Long pautaId) {
+        Pauta pauta = pautaService.getPautaById(pautaId);
+
+        VotingSession votingSession = votingSessionRepository.findOpenVotingSessionByPautaId(pautaId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Voting Session not found for the given Pauta ID" + pautaId));
+
+        if (pauta.getVotingSession() == null) {
+            log.error("Pauta with ID {} does not have an voting session opened", pautaId);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pauta with ID " + pautaId + " does not have an voting session opened");
+        }
+
+        return buildVotingResultResponse(pauta, votingSession);
     }
 
     @Transactional
@@ -33,15 +66,13 @@ public class VotingSessionService {
         return votingSessionRepository.save(votingSession);
     }
 
-    @Transactional
-    public VotingSession findOpenVotingSessionByPautaId(Long pautaId) {
-        return votingSessionRepository.findOpenVotingSessionByPautaId(pautaId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Voting Session not found for the given Pauta ID" + pautaId));
-    }
-
-    private VotingSession findById(Long votingSessionId) {
+    public VotingSession findById(Long votingSessionId) {
         return votingSessionRepository.findById(votingSessionId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Voting Session not found"));
+    }
+
+    public Page<VotingSession> findAll(Pageable pageable) {
+        return votingSessionRepository.findAll(pageable);
     }
 
     @Transactional(readOnly = true)
@@ -64,5 +95,29 @@ public class VotingSessionService {
                 .votingSessionStartedAt(LocalDateTime.now())
                 .votingSessionEndedAt(LocalDateTime.now().plusMinutes(sessionDuration))
                 .build());
+    }
+
+    public Page<VotingSessionResponse> listAllVotingSessions(String votingSessionStatus, Integer page, Integer size) {
+        if (votingSessionStatus == null) votingSessionStatus = "";
+        Pageable pageable = PageRequest.of(page, size);
+
+        if (!votingSessionStatus.isEmpty()) {
+            switch (votingSessionStatus) {
+                case "OPEN" -> {
+                    return votingSessionRepository.listAllVotingSessionsOpen(LocalDateTime.now(), pageable)
+                            .map(VotingSessionResponse::mapToVotingSessionResponse);
+                }
+                case "CLOSED" -> {
+                    return votingSessionRepository.listAllVotingSessionsClosed(LocalDateTime.now(), pageable)
+                            .map(VotingSessionResponse::mapToVotingSessionResponse);
+                }
+                default -> {
+                    return findAll(pageable)
+                            .map(VotingSessionResponse::mapToVotingSessionResponse);
+                }
+            }
+        }
+        return findAll(pageable)
+                .map(VotingSessionResponse::mapToVotingSessionResponse);
     }
 }
