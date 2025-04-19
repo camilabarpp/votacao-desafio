@@ -1,4 +1,4 @@
-package com.votacao.desafio.swagger;
+package com.votacao.desafio.common.swagger;
 
 import com.votacao.desafio.dto.AssociateRequest;
 import com.votacao.desafio.dto.AssociateResponse;

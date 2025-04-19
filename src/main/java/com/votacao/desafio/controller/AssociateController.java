@@ -3,7 +3,7 @@ package com.votacao.desafio.controller;
 import com.votacao.desafio.dto.AssociateRequest;
 import com.votacao.desafio.dto.AssociateResponse;
 import com.votacao.desafio.service.AssociateService;
-import com.votacao.desafio.swagger.AssociateSwagger;
+import com.votacao.desafio.common.swagger.AssociateSwagger;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

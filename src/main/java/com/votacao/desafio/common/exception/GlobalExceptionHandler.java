@@ -1,4 +1,4 @@
-package com.votacao.desafio.exception;
+package com.votacao.desafio.common.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.crossstore.ChangeSetPersister;

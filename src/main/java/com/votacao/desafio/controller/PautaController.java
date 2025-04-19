@@ -4,7 +4,7 @@ import com.votacao.desafio.dto.PautaRequest;
 import com.votacao.desafio.dto.PautaResponse;
 import com.votacao.desafio.dto.VotingResultResponse;
 import com.votacao.desafio.service.PautaManagementService;
-import com.votacao.desafio.swagger.PautaSwagger;
+import com.votacao.desafio.common.swagger.PautaSwagger;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

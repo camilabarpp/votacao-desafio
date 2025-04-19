@@ -1,4 +1,4 @@
-package com.votacao.desafio.swagger;
+package com.votacao.desafio.common.swagger;
 
 import com.votacao.desafio.dto.PautaRequest;
 import com.votacao.desafio.dto.PautaResponse;
