@@ -153,7 +153,7 @@ class VoteServiceTest {
                 voteService.registerVote(1L, voteRequest)
         );
 
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
         assertEquals("Associate already voted", exception.getReason());
     }
 }
