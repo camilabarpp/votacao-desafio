@@ -56,7 +56,7 @@ public class VoteService {
         boolean associateVoted = votingSession.getVotes().stream().anyMatch(vote -> vote.getAssociate().getId().equals(associate.getId()));
         if (associateVoted) {
             log.error("Associate {} already voted", associate.getId());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Associate already voted");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Associate already voted");
         }
         Vote vote = voteRepository.save(Vote.builder()
                 .votingSession(votingSession)

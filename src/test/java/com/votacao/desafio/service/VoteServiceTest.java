@@ -72,7 +72,7 @@ class VoteServiceTest {
 
         voteRequest = new VoteRequest();
         voteRequest.setCpf(cpf);
-        voteRequest.setVote(Vote.VoteOption.NO);
+        voteRequest.setVote(Vote.VoteOption.NO.name());
     }
 
     @Test

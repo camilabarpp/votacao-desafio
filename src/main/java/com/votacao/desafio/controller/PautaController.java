@@ -4,6 +4,7 @@ import com.votacao.desafio.dto.PautaRequest;
 import com.votacao.desafio.dto.PautaResponse;
 import com.votacao.desafio.dto.VotingResultResponse;
 import com.votacao.desafio.service.PautaManagementService;
+import com.votacao.desafio.swagger.PautaSwagger;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("pautas")
 @RequiredArgsConstructor
-public class PautaController {
+public class PautaController implements PautaSwagger {
 
     private final PautaManagementService pautaManagementService;
 

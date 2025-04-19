@@ -38,7 +38,8 @@ public class VotingSessionService {
         Pauta pauta = pautaService.getPautaById(pautaId);
 
         if (pauta.getVotingSession() != null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Voting session already exists for this Pauta");
+            log.error("Voting session already exists for Pauta with ID: {}", pautaId);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Voting session already exists for this Pauta");
         }
 
         VotingSession votingSession = openVotingSession(pauta, votingSessionDurationInMinutes);
