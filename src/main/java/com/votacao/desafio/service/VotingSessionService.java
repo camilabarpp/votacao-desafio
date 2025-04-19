@@ -1,6 +1,5 @@
 package com.votacao.desafio.service;
 
-import com.votacao.desafio.dto.VotingResultResponse;
 import com.votacao.desafio.dto.VotingSessionResponse;
 import com.votacao.desafio.entity.Pauta;
 import com.votacao.desafio.entity.VotingSession;
@@ -18,7 +17,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 
-import static com.votacao.desafio.dto.VotingResultResponse.buildVotingResultResponse;
 import static com.votacao.desafio.dto.VotingSessionResponse.mapToVotingSessionResponse;
 
 @Slf4j
@@ -48,9 +46,9 @@ public class VotingSessionService {
     }
 
     @Transactional(readOnly = true)
-    public VotingSession getOpenVotingSessionById(Long pautaId) {
-        return votingSessionRepository.findOpenVotingSessionByPautaId(pautaId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Voting Session not found for the given Pauta ID" + pautaId));
+    public VotingSession getVotingSessionByPautaId(Long pautaId) {
+        return votingSessionRepository.findByPautaId(pautaId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Voting Session not found for the given Pauta ID " + pautaId));
     }
 
     @Transactional
@@ -75,7 +73,6 @@ public class VotingSessionService {
         return votingSessionRepository.listAllVotingSessionsClosed(LocalDateTime.now(), pageable);
     }
 
-    @Transactional
     public VotingSession openVotingSession(Pauta pauta, Integer sessionDuration) {
         log.info("Opening voting session for Pauta with ID: {}", pauta.getId());
         return votingSessionRepository.save(VotingSession.builder()

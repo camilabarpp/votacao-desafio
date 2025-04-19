@@ -14,9 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
-
 import static com.votacao.desafio.dto.VotingResultResponse.buildVotingResultResponse;
+import static com.votacao.desafio.entity.Vote.VoteOption.fromInput;
 
 @Slf4j
 @Service
@@ -62,7 +61,7 @@ public class VoteService {
         Vote vote = voteRepository.save(Vote.builder()
                 .votingSession(votingSession)
                 .associate(associate)
-                .voteOption(voteRequest.getVote())
+                .voteOption(fromInput(voteRequest.getVote()))
                 .build());
 
         votingSession.getVotes().add(vote);

@@ -30,6 +30,7 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-database-postgresql:10.20.0'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'jakarta.servlet:jakarta.servlet-api:6.0.0'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.projectlombok:lombok'
