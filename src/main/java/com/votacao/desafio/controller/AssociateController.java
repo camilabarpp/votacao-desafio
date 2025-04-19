@@ -3,6 +3,7 @@ package com.votacao.desafio.controller;
 import com.votacao.desafio.dto.AssociateRequest;
 import com.votacao.desafio.dto.AssociateResponse;
 import com.votacao.desafio.service.AssociateService;
+import com.votacao.desafio.swagger.AssociateSwagger;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,9 +14,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/associados")
 @RequiredArgsConstructor
-public class AssociateController {
+public class AssociateController implements AssociateSwagger {
 
-    private final AssociateService associateService;
+private final AssociateService associateService;
 
     @GetMapping
     public ResponseEntity<Page<AssociateResponse>> getAllAssociates(

@@ -31,8 +31,8 @@ public class VotingResultResponse {
         private Integer votesCount;
         private Integer votesCountYes;
         private Integer votesCountNo;
-        private Double percentageYes;
-        private Double percentageNo;
+        private Float percentageYes;
+        private Float percentageNo;
         private VotingResult result;
 
         public enum VotingResult {
@@ -73,8 +73,8 @@ public class VotingResultResponse {
                 .votesCount(votes.size())
                 .votesCountYes(votesCountYes)
                 .votesCountNo(votesCountNo)
-                .percentageYes((double) votesCountYes / votes.size() * 100)
-                .percentageNo((double) votesCountNo / votes.size() * 100)
+                .percentageYes((float) Math.ceil((votesCountYes / (float) votes.size()) * 100 * 100) / 100)
+                .percentageNo((float) Math.ceil((votesCountNo / (float) votes.size()) * 100 * 100) / 100)
                 .result(calculateVotingResult(votesCountYes, votesCountNo, sessionResponse.getVotingSessionStatus()))
                 .build();
         resultado.setVotingResult(pautaResult);

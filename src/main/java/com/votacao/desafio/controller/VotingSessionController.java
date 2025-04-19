@@ -1,8 +1,8 @@
 package com.votacao.desafio.controller;
 
-import com.votacao.desafio.dto.VotingResultResponse;
 import com.votacao.desafio.dto.VotingSessionResponse;
 import com.votacao.desafio.service.VotingSessionService;
+import com.votacao.desafio.swagger.VotingSessionSwagger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/sessoes")
 @RequiredArgsConstructor
-public class VotingSessionController {
+public class VotingSessionController implements VotingSessionSwagger {
 
     private final VotingSessionService votingSessionService;
 
