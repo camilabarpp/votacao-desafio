@@ -97,4 +97,45 @@ public class VotingSessionService {
 
         return votingSessions.map(VotingSessionResponse::mapToVotingSessionResponse);
     }
+
+    @Transactional
+    public VotingSessionResponse updateVotingSession(Long sessionId, Integer votingSessionDurationInMinutes) {
+        VotingSession session = findById(sessionId);
+
+        if (VotingSession.VotingSessionStatus.CLOSED.equals(session.getVotingSessionStatus())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot update a closed session");
+        }
+
+        if (VotingSession.VotingSessionStatus.OPEN.equals(session.getVotingSessionStatus()) &&
+                hasVotes(session)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot update a session that already has votes");
+        }
+
+        LocalDateTime newEndTime = session.getVotingSessionEndedAt().plusMinutes(votingSessionDurationInMinutes);
+        session.setVotingSessionEndedAt(newEndTime);
+
+        VotingSession updatedSession = votingSessionRepository.save(session);
+        log.info("Voting session updated successfully: {}", updatedSession.getId());
+
+        return mapToVotingSessionResponse(updatedSession);
+    }
+
+    private boolean hasVotes(VotingSession session) {
+        return session.getVotes() != null && !session.getVotes().isEmpty();
+    }
+
+    @Transactional
+    public VotingSessionResponse closeVotingSession(Long sessaoId) {
+        VotingSession votingSession = findById(sessaoId);
+
+        if (VotingSession.VotingSessionStatus.CLOSED.equals(votingSession.getVotingSessionStatus())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot close an already closed session");
+        }
+
+        votingSession.setVotingSessionEndedAt(LocalDateTime.now());
+        votingSessionRepository.save(votingSession);
+
+        log.info("Voting session closed successfully: {}", votingSession.getId());
+        return mapToVotingSessionResponse(votingSession);
+    }
 }

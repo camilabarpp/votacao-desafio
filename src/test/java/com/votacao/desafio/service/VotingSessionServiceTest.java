@@ -2,6 +2,7 @@ package com.votacao.desafio.service;
 
 import com.votacao.desafio.dto.VotingSessionResponse;
 import com.votacao.desafio.entity.Pauta;
+import com.votacao.desafio.entity.Vote;
 import com.votacao.desafio.entity.VotingSession;
 import com.votacao.desafio.repository.VotingSessionRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,16 +37,75 @@ class VotingSessionServiceTest {
     private VotingSessionService votingSessionService;
 
     private Pageable pageable;
+    private Pauta pauta;
+    private VotingSession votingSession;
+    private VotingSessionResponse votingSessionResponse;
 
     @BeforeEach
     void setUp() {
         pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "votingSessionStartedAt"));
+
+        pauta = Pauta.builder()
+                .id(1L)
+                .title("Test Pauta")
+                .description("Test Description")
+                .createdAt(LocalDateTime.now())
+                .build();
+
+
+        votingSession = VotingSession.builder()
+                .id(1L)
+                .pauta(pauta)
+                .votingSessionStartedAt(LocalDateTime.now())
+                .votingSessionEndedAt(LocalDateTime.now().plusMinutes(10))
+                .build();
+
+        votingSessionResponse = VotingSessionResponse.builder()
+                .id(1L)
+                .votingSessionStatus("OPEN")
+                .votingSessionStartedAt(LocalDateTime.now())
+                .votingSessionEndedAt(LocalDateTime.now().plusMinutes(10))
+                .votes(Collections.emptyList())
+                .build();
     }
 
     @Test
-    @DisplayName("Deve retornar a sessão de votação pelo ID com sucesso")
+    @DisplayName("Should return a page of voting sessions")
+    void getVotingSessionByPautaId_WithExistingPautaId_ShouldReturnVotingSession() {
+        Long pautaId = 1L;
+
+        when(votingSessionRepository.findByPautaId(pautaId)).thenReturn(Optional.of(votingSession));
+
+        VotingSession result = votingSessionService.getVotingSessionByPautaId(pautaId);
+
+        assertNotNull(result);
+        assertEquals(votingSession.getId(), result.getId());
+        assertEquals(votingSession.getPauta(), result.getPauta());
+        assertEquals(votingSession.getVotingSessionStartedAt(), result.getVotingSessionStartedAt());
+        assertEquals(votingSession.getVotingSessionEndedAt(), result.getVotingSessionEndedAt());
+
+        verify(votingSessionRepository).findByPautaId(pautaId);
+    }
+
+    @Test
+    @DisplayName("Should return voting session by pauta ID with success")
+    void getVotingSessionByPautaId_WithNonExistingPautaId_ShouldThrowException() {
+        Long pautaId = 999L;
+
+        when(votingSessionRepository.findByPautaId(pautaId)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                votingSessionService.getVotingSessionByPautaId(pautaId)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertEquals("Voting Session not found for the given Pauta ID " + pautaId, exception.getReason());
+        verify(votingSessionRepository).findByPautaId(pautaId);
+    }
+
+    @Test
+    @DisplayName("Should return VotingSessionResponse when ID exists")
     void getVotingSessionById_WithExistingId_ShouldReturnVotingSessionResponse() {
-        VotingSession votingSession = new VotingSession();
         votingSession.setId(1L);
         when(votingSessionRepository.findById(1L)).thenReturn(Optional.of(votingSession));
 
@@ -71,28 +132,30 @@ class VotingSessionServiceTest {
     }
 
     @Test
-    @DisplayName("Deve lançar exceção quando já existe uma sessão de votação para a pauta")
-    void openVotingSessionByPautaId_WhenVotingSessionAlreadyExists_ShouldThrowException() {
-        // Arrange
-        Pauta pauta = new Pauta();
-        pauta.setVotingSession(new VotingSession()); // Simula uma pauta com sessão de votação existente
-        when(pautaService.getPautaById(1L)).thenReturn(pauta);
+    @DisplayName("Should open a new voting session for a Pauta with success")
+    void openVotingSessionByPautaId_WithValidPautaAndDuration_ShouldReturnVotingSessionResponse() {
+        Long pautaId = 1L;
+        Integer duration = 30;
+        pauta.setVotingSession(null);
 
-        // Act & Assert
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
-                votingSessionService.openVotingSessionByPautaId(1L, 30)
-        );
+        when(pautaService.getPautaById(pautaId)).thenReturn(pauta);
+        when(votingSessionRepository.save(any(VotingSession.class))).thenReturn(votingSession);
 
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
-        assertEquals("Voting session already exists for this Pauta", exception.getReason());
-        verify(pautaService, times(1)).getPautaById(1L);
-        verifyNoInteractions(votingSessionRepository);
+        VotingSessionResponse result = votingSessionService.openVotingSessionByPautaId(pautaId, duration);
+
+        assertNotNull(result);
+        assertEquals(votingSessionResponse.getId(), result.getId());
+        assertEquals(votingSessionResponse.getVotingSessionStatus(), result.getVotingSessionStatus());
+        assertEquals(votingSessionResponse.getVotes(), result.getVotes());
+
+        verify(pautaService).getPautaById(pautaId);
+        verify(votingSessionRepository).save(any(VotingSession.class));
     }
 
+
     @Test
-    @DisplayName("Should open voting session successfully")
-    void openVotingSessionByPautaId_WithExistingVotingSession_ShouldThrowException() {
-        Pauta pauta = new Pauta();
+    @DisplayName("Should throw exception when VotingSession already exists")
+    void openVotingSessionByPautaId_WhenVotingSessionAlreadyExists_ShouldThrowException() {
         pauta.setVotingSession(new VotingSession());
         when(pautaService.getPautaById(1L)).thenReturn(pauta);
 
@@ -100,7 +163,23 @@ class VotingSessionServiceTest {
                 votingSessionService.openVotingSessionByPautaId(1L, 30)
         );
 
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+        assertEquals("Voting session already exists for this Pauta", exception.getReason());
+        verify(pautaService, times(1)).getPautaById(1L);
+        verifyNoInteractions(votingSessionRepository);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when VotingSession already exists")
+    void openVotingSessionByPautaId_WithExistingVotingSession_ShouldThrowException() {
+        pauta.setVotingSession(new VotingSession());
+        when(pautaService.getPautaById(1L)).thenReturn(pauta);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                votingSessionService.openVotingSessionByPautaId(1L, 30)
+        );
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
         assertEquals("Voting session already exists for this Pauta", exception.getReason());
         verify(pautaService, times(1)).getPautaById(1L);
         verifyNoInteractions(votingSessionRepository);
@@ -149,9 +228,8 @@ class VotingSessionServiceTest {
     }
 
     @Test
-    @DisplayName("Deve salvar uma sessão de votação com sucesso")
+    @DisplayName("Should save and return VotingSession")
     void saveVotingSession_WithValidVotingSession_ShouldSaveAndReturn() {
-        VotingSession votingSession = new VotingSession();
         when(votingSessionRepository.save(votingSession)).thenReturn(votingSession);
 
         VotingSession result = votingSessionService.saveVotingSession(votingSession);
@@ -162,9 +240,8 @@ class VotingSessionServiceTest {
     }
 
     @Test
-    @DisplayName("Deve retornar uma sessão de votação pelo ID")
+    @DisplayName("Should return VotingSession when ID exists")
     void findById_WithExistingId_ShouldReturnVotingSession() {
-        VotingSession votingSession = new VotingSession();
         votingSession.setId(1L);
         when(votingSessionRepository.findById(1L)).thenReturn(Optional.of(votingSession));
 
@@ -176,7 +253,7 @@ class VotingSessionServiceTest {
     }
 
     @Test
-    @DisplayName("Deve lançar exceção ao buscar sessão de votação com ID inexistente")
+    @DisplayName("Should throw exception when VotingSession not found")
     void findById_WithNonExistingId_ShouldThrowException() {
         when(votingSessionRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -190,7 +267,7 @@ class VotingSessionServiceTest {
     }
 
     @Test
-    @DisplayName("Deve listar todas as sessões de votação abertas com sucesso")
+    @DisplayName("Should list all voting sessions open with success")
     void listAllVotingSessionsOpen_WithValidPageAndSize_ShouldReturnOpenSessions() {
         Page<VotingSession> votingSessionPage = new PageImpl<>(Collections.singletonList(new VotingSession()));
         when(votingSessionRepository.listAllVotingSessionsOpen(any(LocalDateTime.class), eq(pageable))).thenReturn(votingSessionPage);
@@ -203,7 +280,7 @@ class VotingSessionServiceTest {
     }
 
     @Test
-    @DisplayName("Deve listar todas as sessões de votação fechadas com sucesso")
+    @DisplayName("Should list all voting sessions closed with success")
     void listAllVotingSessionsClosed_WithValidPageAndSize_ShouldReturnClosedSessions() {
         Page<VotingSession> votingSessionPage = new PageImpl<>(Collections.singletonList(new VotingSession()));
         when(votingSessionRepository.listAllVotingSessionsClosed(any(LocalDateTime.class), eq(pageable))).thenReturn(votingSessionPage);
@@ -216,17 +293,10 @@ class VotingSessionServiceTest {
     }
 
     @Test
-    @DisplayName("Deve abrir uma nova sessão de votação com sucesso")
+    @DisplayName("Should save and return VotingSession when opening a new session")
     void openVotingSession_WithValidPautaAndDuration_ShouldSaveAndReturnVotingSession() {
-        Pauta pauta = new Pauta();
         pauta.setId(1L);
         int sessionDuration = 30;
-
-        VotingSession votingSession = VotingSession.builder()
-                .pauta(pauta)
-                .votingSessionStartedAt(LocalDateTime.now())
-                .votingSessionEndedAt(LocalDateTime.now().plusMinutes(sessionDuration))
-                .build();
 
         when(votingSessionRepository.save(any(VotingSession.class))).thenReturn(votingSession);
 
@@ -235,5 +305,170 @@ class VotingSessionServiceTest {
         assertNotNull(result);
         assertEquals(pauta, result.getPauta());
         verify(votingSessionRepository, times(1)).save(any(VotingSession.class));
+    }
+
+    @Test
+    @DisplayName("Should update and return VotingSession when updating session")
+    void updateVotingSession_WithValidSessionAndDuration_ShouldUpdateAndReturnResponse() {
+        // given
+        Long sessionId = 1L;
+        int additionalMinutes = 30;
+        LocalDateTime initialEndTime = LocalDateTime.now().plusMinutes(10);
+
+        VotingSession updatedSession = VotingSession.builder()
+                .id(sessionId)
+                .votingSessionEndedAt(initialEndTime.plusMinutes(additionalMinutes))
+                .build();
+
+        VotingSessionResponse expectedResponse = VotingSessionResponse.builder()
+                .id(sessionId)
+                .votingSessionEndedAt(initialEndTime.plusMinutes(additionalMinutes))
+                .build();
+
+        when(votingSessionRepository.findById(sessionId)).thenReturn(Optional.of(votingSession));
+        when(votingSessionRepository.save(any(VotingSession.class))).thenReturn(updatedSession);
+
+        VotingSessionResponse result = votingSessionService.updateVotingSession(sessionId, additionalMinutes);
+
+        assertNotNull(result);
+        assertEquals(expectedResponse.getId(), result.getId());
+        assertEquals(expectedResponse.getVotingSessionEndedAt(), result.getVotingSessionEndedAt());
+
+        verify(votingSessionRepository).findById(sessionId);
+        verify(votingSessionRepository).save(any(VotingSession.class));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when trying to update a closed session")
+    void updateVotingSession_WithClosedSession_ShouldThrowException() {
+        Long sessionId = 1L;
+        int additionalMinutes = 30;
+
+        votingSession.setVotingSessionStartedAt(LocalDateTime.now().minusMinutes(additionalMinutes));
+        votingSession.setVotingSessionEndedAt(LocalDateTime.now().minusMinutes(2));
+
+        when(votingSessionRepository.findById(sessionId)).thenReturn(Optional.of(votingSession));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                votingSessionService.updateVotingSession(sessionId, additionalMinutes)
+        );
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+        assertEquals("Cannot update a closed session", exception.getReason());
+
+        verify(votingSessionRepository).findById(sessionId);
+        verifyNoMoreInteractions(votingSessionRepository);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when trying to update a session with existing votes")
+    void updateVotingSession_WithExistingVotes_ShouldThrowException() {
+        Long sessionId = 1L;
+        Integer additionalMinutes = 30;
+        votingSession.setVotes(
+                List.of(
+                        Vote.builder()
+                                .id(1L)
+                                .votingSession(votingSession)
+                                .build())
+        );
+
+        when(votingSessionRepository.findById(sessionId)).thenReturn(Optional.of(votingSession));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                votingSessionService.updateVotingSession(sessionId, additionalMinutes)
+        );
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+        assertEquals("Cannot update a session that already has votes", exception.getReason());
+
+        verify(votingSessionRepository).findById(sessionId);
+        verifyNoMoreInteractions(votingSessionRepository);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when trying to update a non-existing session")
+    void updateVotingSession_WithNonExistingSession_ShouldThrowException() {
+        Long sessionId = 999L;
+        Integer additionalMinutes = 30;
+
+        when(votingSessionRepository.findById(sessionId)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                votingSessionService.updateVotingSession(sessionId, additionalMinutes)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertEquals("Voting Session not found", exception.getReason());
+
+        verify(votingSessionRepository).findById(sessionId);
+        verifyNoMoreInteractions(votingSessionRepository);
+    }
+
+    @Test
+    @DisplayName("Should close voting session and return response")
+    void closeVotingSession_WithOpenSession_ShouldCloseAndReturnResponse() {
+        Long sessionId = 1L;
+
+        VotingSession closedSession = VotingSession.builder()
+                .id(sessionId)
+                .votingSessionEndedAt(LocalDateTime.now())
+                .build();
+
+        VotingSessionResponse expectedResponse = VotingSessionResponse.builder()
+                .id(sessionId)
+                .votingSessionEndedAt(closedSession.getVotingSessionEndedAt())
+                .build();
+
+        // when
+        when(votingSessionRepository.findById(sessionId)).thenReturn(Optional.of(votingSession));
+        when(votingSessionRepository.save(any(VotingSession.class))).thenReturn(closedSession);
+
+        // then
+        VotingSessionResponse result = votingSessionService.closeVotingSession(sessionId);
+
+        assertNotNull(result);
+        assertEquals(expectedResponse.getId(), result.getId());
+        assertEquals("CLOSED", result.getVotingSessionStatus());
+
+        verify(votingSessionRepository).findById(sessionId);
+        verify(votingSessionRepository).save(any(VotingSession.class));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when trying to close an already closed session")
+    void closeVotingSession_WithClosedSession_ShouldThrowException() {
+        Long sessionId = 1L;
+        votingSession.setVotingSessionEndedAt(LocalDateTime.now().minusMinutes(1));
+
+        when(votingSessionRepository.findById(sessionId)).thenReturn(Optional.of(votingSession));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                votingSessionService.closeVotingSession(sessionId)
+        );
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+        assertEquals("Cannot close an already closed session", exception.getReason());
+
+        verify(votingSessionRepository).findById(sessionId);
+        verifyNoMoreInteractions(votingSessionRepository);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when trying to close a non-existing session")
+    void closeVotingSession_WithNonExistingSession_ShouldThrowException() {
+        Long sessionId = 999L;
+
+        when(votingSessionRepository.findById(sessionId)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                votingSessionService.closeVotingSession(sessionId)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertEquals("Voting Session not found", exception.getReason());
+
+        verify(votingSessionRepository).findById(sessionId);
+        verifyNoMoreInteractions(votingSessionRepository);
     }
 }

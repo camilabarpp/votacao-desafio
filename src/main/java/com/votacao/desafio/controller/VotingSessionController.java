@@ -1,8 +1,8 @@
 package com.votacao.desafio.controller;
 
+import com.votacao.desafio.common.swagger.VotingSessionSwagger;
 import com.votacao.desafio.dto.VotingSessionResponse;
 import com.votacao.desafio.service.VotingSessionService;
-import com.votacao.desafio.common.swagger.VotingSessionSwagger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -35,5 +35,17 @@ public class VotingSessionController implements VotingSessionSwagger {
     public ResponseEntity<VotingSessionResponse> getVotingSessionById(@PathVariable Long sessaoId) {
         VotingSessionResponse sessao = votingSessionService.getVotingSessionById(sessaoId);
         return ResponseEntity.ok(sessao);
+    }
+
+    @PutMapping("/{sessaoId}")
+    public ResponseEntity<VotingSessionResponse> updateVotingSession(@PathVariable Long sessaoId, @RequestParam(defaultValue = "1") Integer votingSessionDurationInMinutes) {
+        VotingSessionResponse updatedSession = votingSessionService.updateVotingSession(sessaoId, votingSessionDurationInMinutes);
+        return ResponseEntity.ok(updatedSession);
+    }
+
+    @PatchMapping("/{sessaoId}/fechar")
+    public ResponseEntity<VotingSessionResponse> closeVotingSession(@PathVariable Long sessaoId) {
+        VotingSessionResponse closedSession = votingSessionService.closeVotingSession(sessaoId);
+        return ResponseEntity.ok(closedSession);
     }
 }
