@@ -2,7 +2,10 @@ package com.votacao.desafio.service;
 
 import com.votacao.desafio.dto.PautaRequest;
 import com.votacao.desafio.dto.PautaResponse;
+import com.votacao.desafio.dto.VotingResultResponse;
+import com.votacao.desafio.entity.Associate;
 import com.votacao.desafio.entity.Pauta;
+import com.votacao.desafio.entity.Vote;
 import com.votacao.desafio.entity.VotingSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,13 +17,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -38,6 +42,7 @@ class PautaManagementServiceTest {
 
     private PautaRequest pautaRequest;
     private Pauta savedPauta;
+    private VotingSession votingSession;
     private List<VotingSession> votingSessions;
     private Page<Pauta> pautaPage;
 
@@ -59,7 +64,7 @@ class PautaManagementServiceTest {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        VotingSession votingSession = VotingSession.builder()
+        votingSession = VotingSession.builder()
                 .id(1L)
                 .pauta(Pauta.builder()
                         .id(1L)
@@ -184,17 +189,39 @@ class PautaManagementServiceTest {
         verify(pautaQueryService, times(1)).getPautaById(1L);
     }
 
-//    @Test
-//    @DisplayName("Should return voting session by ID")
-//    void getVotingResult_WithNoVotingSession_ShouldThrowException() {
-//        Pauta pauta = new Pauta();
-//        when(pautaQueryService.getPautaById(1L)).thenReturn(pauta);
-//        pauta.setVotingSession(null);
-//
-//        assertThrows(ResponseStatusException.class, () -> pautaManagementService.getVotingResult(1L));
-//
-//        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-//        assertEquals("Voting Session not found for the given Pauta ID1", exception.getReason());
-//        verify(pautaQueryService, times(1)).getPautaById(1L);
-//    }
+    @Test
+    @DisplayName("Should get pauta response by id with valid id")
+    void getVotingResult_WithValidPautaAndSession_ShouldReturnResult() {
+        Long pautaId = 1L;
+        savedPauta.setVotingSession(votingSession);
+        votingSession.setVotes(List.of(Vote.builder().id(1L).associate(Associate.builder().id(1L).build()).voteOption(Vote.VoteOption.NO).build()));
+
+        when(pautaQueryService.getPautaById(pautaId)).thenReturn(savedPauta);
+        when(votingSessionService.getVotingSessionByPautaId(pautaId)).thenReturn(votingSession);
+
+        VotingResultResponse result = pautaManagementService.getVotingResult(pautaId);
+
+        assertNotNull(result);
+        verify(pautaQueryService).getPautaById(pautaId);
+        verify(votingSessionService).getVotingSessionByPautaId(pautaId);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when pauta is not found")
+    void getVotingResult_WithPautaWithoutSession_ShouldThrowException() {
+        Long pautaId = 1L;
+        savedPauta.setVotingSession(null);
+
+        when(pautaQueryService.getPautaById(pautaId)).thenReturn(savedPauta);
+        when(votingSessionService.getVotingSessionByPautaId(pautaId)).thenReturn(votingSession);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> pautaManagementService.getVotingResult(pautaId));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        assertEquals("Pauta with ID " + pautaId + " does not have an voting session opened",
+                exception.getReason());
+        verify(pautaQueryService).getPautaById(pautaId);
+        verify(votingSessionService).getVotingSessionByPautaId(pautaId);
+    }
 }
