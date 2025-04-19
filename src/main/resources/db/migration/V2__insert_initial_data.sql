@@ -1,14 +1,14 @@
 INSERT INTO associados (nome, cpf, email)
-VALUES ('João Silva', '12345678900', 'joao@email.com'),
-       ('Maria Santos', '23456789010', 'maria@email.com'),
-       ('Pedro Oliveira', '34567890120', 'pedro@email.com'),
-       ('Ana Pereira', '78912345600', 'ana@email.com'),
-       ('Carlos Ferreira', '45678901230', 'carlos@email.com'),
-       ('Lucia Mendes', '56789012340', 'lucia@email.com'),
-       ('Roberto Alves', '67890123450', 'roberto@email.com'),
-       ('Juliana Costa', '89012345670', 'juliana@email.com'),
-       ('Fernando Souza', '90123456780', 'fernando@email.com'),
-       ('Beatriz Lima', '01234567890', 'beatriz@email.com');
+VALUES ('João Silva', '30115367080', 'joao@email.com'),
+       ('Maria Santos', '12959829000', 'maria@email.com'),
+       ('Pedro Oliveira', '01355361036', 'pedro@email.com'),
+       ('Ana Pereira', '30075460017', 'ana@email.com'),
+       ('Carlos Ferreira', '46416139073', 'carlos@email.com'),
+       ('Lucia Mendes', '87029178076', 'lucia@email.com'),
+       ('Roberto Alves', '39245507009', 'roberto@email.com'),
+       ('Juliana Costa', '09766847053', 'juliana@email.com'),
+       ('Fernando Souza', '55151007009', 'fernando@email.com'),
+       ('Beatriz Lima', '60106130005', 'beatriz@email.com');
 
 INSERT INTO pautas (titulo, descricao)
 VALUES ('Reforma do Estatuto Social', 'Discussão sobre as alterações propostas no estatuto social da organização.'),
@@ -33,6 +33,11 @@ VALUES (1, 1, 'YES', '2025-01-18T01:07:00.123456'),
        (1, 3, 'NO', '2025-01-18T01:08:12.123456'),
        (1, 4, 'NO', '2025-01-18T01:07:04.978857'),
        (1, 5, 'YES', '2025-01-18T02:15:30.567890'),
+       (1, 6, 'YES', '2025-01-18T03:20:00.234567'),
+       (1, 7, 'NO', '2025-01-18T04:30:00.890123'),
+       (1, 8, 'YES', '2025-01-18T05:45:00.567890'),
+       (1, 9, 'NO', '2025-01-18T06:50:00.123456'),
+       (1, 10, 'YES', '2025-01-18T07:55:00.789012'),
 
        (2, 1, 'NO', '2025-02-15T10:15:00.123456'),
        (2, 2, 'NO', '2025-02-15T11:20:00.456789'),

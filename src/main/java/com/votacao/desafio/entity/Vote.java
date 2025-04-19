@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 
@@ -42,6 +44,23 @@ public class Vote {
     private LocalDateTime votedAt;
 
     public enum VoteOption {
-        YES, NO
+        YES, NO;
+
+        public static String getValues() {
+            StringBuilder values = new StringBuilder();
+            for (VoteOption voteOption : VoteOption.values()) {
+                values.append(voteOption.name()).append(", ");
+            }
+            return values.substring(0, values.length() - 2);
+        }
+
+        public static VoteOption fromInput(String input) {
+            for (VoteOption voteOption : VoteOption.values()) {
+                if (voteOption.name().equalsIgnoreCase(input)) {
+                    return voteOption;
+                }
+            }
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid vote option: " + input + ". Valid options are: " + getValues());
+        }
     }
 }

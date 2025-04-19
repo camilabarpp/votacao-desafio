@@ -4,6 +4,7 @@ import com.votacao.desafio.dto.PautaRequest;
 import com.votacao.desafio.dto.PautaResponse;
 import com.votacao.desafio.dto.VotingResultResponse;
 import com.votacao.desafio.service.PautaManagementService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,7 @@ public class PautaController {
     private final PautaManagementService pautaManagementService;
 
     @PostMapping()
-    public ResponseEntity<PautaResponse> createPauta(@RequestBody PautaRequest pautaRequest) {
+    public ResponseEntity<PautaResponse> createPauta(@RequestBody @Valid PautaRequest pautaRequest) {
         PautaResponse pautaResponse = pautaManagementService.createPauta(pautaRequest);
         return new ResponseEntity<>(pautaResponse, HttpStatus.CREATED);
     }

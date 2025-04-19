@@ -73,7 +73,7 @@ public class PautaManagementService {
     public VotingResultResponse getVotingResult(Long pautaId) {
         Pauta pauta = pautaQueryService.getPautaById(pautaId);
 
-        VotingSession votingSession = votingSessionService.getOpenVotingSessionById(pautaId);
+        VotingSession votingSession = votingSessionService.getVotingSessionByPautaId(pautaId);
 
         if (pauta.getVotingSession() == null) {
             log.error("Pauta with ID {} does not have an voting session opened", pautaId);
