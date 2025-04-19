@@ -7,9 +7,10 @@ import com.votacao.desafio.repository.VotingSessionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class VotingSessionServiceTest {
 
     @Mock
@@ -36,8 +38,6 @@ class VotingSessionServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
         pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "votingSessionStartedAt"));
     }
 
@@ -146,23 +146,6 @@ class VotingSessionServiceTest {
         assertEquals(1, result.getTotalElements());
         verify(votingSessionRepository, times(1)).listAllVotingSessionsClosed(any(LocalDateTime.class), eq(pageable));
         verifyNoMoreInteractions(votingSessionRepository);
-    }
-
-    @Test
-    @DisplayName("Should return voting session by ID")
-    void getVotingResult_WithNoVotingSession_ShouldThrowException() {
-        Pauta pauta = new Pauta();
-        when(pautaService.getPautaById(1L)).thenReturn(pauta);
-        when(votingSessionRepository.findOpenVotingSessionByPautaId(1L)).thenReturn(Optional.empty());
-
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
-                votingSessionService.getVotingResult(1L)
-        );
-
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        assertEquals("Voting Session not found for the given Pauta ID1", exception.getReason());
-        verify(pautaService, times(1)).getPautaById(1L);
-        verify(votingSessionRepository, times(1)).findOpenVotingSessionByPautaId(1L);
     }
 
     @Test

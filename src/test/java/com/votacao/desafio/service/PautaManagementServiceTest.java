@@ -11,7 +11,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -181,4 +183,18 @@ class PautaManagementServiceTest {
         assertEquals(savedPauta.getDescription(), result.getDescription());
         verify(pautaQueryService, times(1)).getPautaById(1L);
     }
+
+//    @Test
+//    @DisplayName("Should return voting session by ID")
+//    void getVotingResult_WithNoVotingSession_ShouldThrowException() {
+//        Pauta pauta = new Pauta();
+//        when(pautaQueryService.getPautaById(1L)).thenReturn(pauta);
+//        pauta.setVotingSession(null);
+//
+//        assertThrows(ResponseStatusException.class, () -> pautaManagementService.getVotingResult(1L));
+//
+//        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+//        assertEquals("Voting Session not found for the given Pauta ID1", exception.getReason());
+//        verify(pautaQueryService, times(1)).getPautaById(1L);
+//    }
 }

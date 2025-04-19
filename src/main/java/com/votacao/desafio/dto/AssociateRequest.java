@@ -11,4 +11,12 @@ public class AssociateRequest {
     private String cpf;
     @NotNull(message = "Email is required")
     private String email;
+
+    public String getCpf() {
+        return cpf.replaceAll("[^0-9]", "");
+    }
+
+    public String getEmail() {
+        return email.toLowerCase();
+    }
 }

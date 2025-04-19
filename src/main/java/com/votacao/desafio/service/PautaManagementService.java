@@ -2,7 +2,9 @@ package com.votacao.desafio.service;
 
 import com.votacao.desafio.dto.PautaRequest;
 import com.votacao.desafio.dto.PautaResponse;
+import com.votacao.desafio.dto.VotingResultResponse;
 import com.votacao.desafio.entity.Pauta;
+import com.votacao.desafio.entity.VotingSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -13,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import static com.votacao.desafio.dto.VotingResultResponse.buildVotingResultResponse;
 
 @Slf4j
 @Service
@@ -64,5 +68,18 @@ public class PautaManagementService {
     public PautaResponse getPautaResponseById(Long pautaId) {
         Pauta pauta = pautaQueryService.getPautaById(pautaId);
         return PautaResponse.mapToPautaResponse(pauta);
+    }
+
+    public VotingResultResponse getVotingResult(Long pautaId) {
+        Pauta pauta = pautaQueryService.getPautaById(pautaId);
+
+        VotingSession votingSession = votingSessionService.getOpenVotingSessionById(pautaId);
+
+        if (pauta.getVotingSession() == null) {
+            log.error("Pauta with ID {} does not have an voting session opened", pautaId);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pauta with ID " + pautaId + " does not have an voting session opened");
+        }
+
+        return buildVotingResultResponse(pauta, votingSession);
     }
 }
