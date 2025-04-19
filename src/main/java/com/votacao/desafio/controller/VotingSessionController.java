@@ -36,10 +36,4 @@ public class VotingSessionController {
         VotingSessionResponse sessao = votingSessionService.getVotingSessionById(sessaoId);
         return ResponseEntity.ok(sessao);
     }
-
-    @GetMapping("/pauta/{pautaId}/resultado")
-    public ResponseEntity<VotingResultResponse> consultarResultado(@PathVariable Long pautaId) {
-        VotingResultResponse resultado = votingSessionService.getVotingResult(pautaId);
-        return ResponseEntity.ok(resultado);
-    }
 }

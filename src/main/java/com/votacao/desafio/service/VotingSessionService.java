@@ -47,18 +47,10 @@ public class VotingSessionService {
         return mapToVotingSessionResponse(votingSession);
     }
 
-    public VotingResultResponse getVotingResult(Long pautaId) {
-        Pauta pauta = pautaService.getPautaById(pautaId);
-
-        VotingSession votingSession = votingSessionRepository.findOpenVotingSessionByPautaId(pautaId)
+    @Transactional(readOnly = true)
+    public VotingSession getOpenVotingSessionById(Long pautaId) {
+        return votingSessionRepository.findOpenVotingSessionByPautaId(pautaId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Voting Session not found for the given Pauta ID" + pautaId));
-
-        if (pauta.getVotingSession() == null) {
-            log.error("Pauta with ID {} does not have an voting session opened", pautaId);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pauta with ID " + pautaId + " does not have an voting session opened");
-        }
-
-        return buildVotingResultResponse(pauta, votingSession);
     }
 
     @Transactional

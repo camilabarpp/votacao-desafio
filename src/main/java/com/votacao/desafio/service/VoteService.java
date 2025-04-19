@@ -27,6 +27,7 @@ public class VoteService {
     private final VotingSessionService votingSessionService;
     private final AssociateService associateService;
     private final VoteRepository voteRepository;
+    private final CpfValidationService cpfValidationService;
 
     @Transactional
     public VotingResultResponse registerVote(Long pautaId, VoteRequest voteRequest) {
@@ -40,17 +41,17 @@ public class VoteService {
 
         VotingSession votingSession = votingSessionService.findById(pauta.getVotingSession().getId());
         String associateCpf = voteRequest.getCpf();
-        //todo chamar a request de validar cpf
+
+        if (cpfValidationService.validateCpf(associateCpf).equals(CpfValidationService.StatusVotacao.UNABLE_TO_VOTE)) {
+            log.error("Invalid CPF {}", associateCpf);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid CPF " + associateCpf);
+        }
+
         Associate associate = associateService.getAssociateByCpf(associateCpf);
 
         if (votingSession.getVotingSessionStatus().name().equals("CLOSED")) {
             log.error("Voting session {} is closed", votingSession.getId());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Voting session is closed");
-        }
-
-        if (votingSession.getVotingSessionEndedAt().isBefore(LocalDateTime.now())) {
-            log.error("Voting session {} has ended", votingSession.getId());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Voting session has ended");
         }
 
         boolean associateVoted = votingSession.getVotes().stream().anyMatch(vote -> vote.getAssociate().getId().equals(associate.getId()));

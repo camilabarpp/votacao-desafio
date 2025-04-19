@@ -2,6 +2,7 @@ package com.votacao.desafio.controller;
 
 import com.votacao.desafio.dto.PautaRequest;
 import com.votacao.desafio.dto.PautaResponse;
+import com.votacao.desafio.dto.VotingResultResponse;
 import com.votacao.desafio.service.PautaManagementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,5 +36,11 @@ public class PautaController {
     public ResponseEntity<PautaResponse> getPautaById(@PathVariable Long pautaId) {
         PautaResponse pauta = pautaManagementService.getPautaResponseById(pautaId);
         return ResponseEntity.ok(pauta);
+    }
+
+    @GetMapping("/{pautaId}/resultado")
+    public ResponseEntity<VotingResultResponse> getVotingResult(@PathVariable Long pautaId) {
+        VotingResultResponse votingResult = pautaManagementService.getVotingResult(pautaId);
+        return ResponseEntity.ok(votingResult);
     }
 }
