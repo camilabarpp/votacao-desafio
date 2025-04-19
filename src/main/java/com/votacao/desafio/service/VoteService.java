@@ -41,7 +41,7 @@ public class VoteService {
         VotingSession votingSession = votingSessionService.findById(pauta.getVotingSession().getId());
         String associateCpf = voteRequest.getCpf();
 
-        if (cpfValidationService.validateCpf(associateCpf).equals(CpfValidationService.StatusVotacao.UNABLE_TO_VOTE)) {
+        if (cpfValidationService.validateCpf(associateCpf).equals(CpfValidationService.VotingPermission.UNABLE_TO_VOTE)) {
             log.error("Invalid CPF {}", associateCpf);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid CPF " + associateCpf);
         }
