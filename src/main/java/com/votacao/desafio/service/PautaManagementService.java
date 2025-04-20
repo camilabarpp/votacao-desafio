@@ -87,10 +87,7 @@ public class PautaManagementService {
     public PautaResponse updatePauta(Long pautaId, @Valid PautaRequest pautaRequest) {
         Pauta pauta = pautaQueryService.getPautaById(pautaId);
 
-        if (pauta.getVotingSession() != null) {
-            log.error("Pauta with ID {} cannot be updated because it has an voting session opened", pautaId);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pauta with ID " + pautaId + " cannot be updated because it has an voting session opened");
-        }
+        verifyIfPautaHasVotingSessionOpen(pauta, String.format("Pauta with ID %s cannot be updated because it has an voting session opened", pautaId));
 
         pauta.setTitle(pautaRequest.getTitle());
         pauta.setDescription(pautaRequest.getDescription());
@@ -101,11 +98,16 @@ public class PautaManagementService {
 
     public void deletePauta(Long pautaId) {
         Pauta pauta = pautaQueryService.getPautaById(pautaId);
-        if (pauta.getVotingSession() != null) {
-            log.error("Pauta with ID {} cannot be deleted because it has an voting session opened", pautaId);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pauta with ID " + pautaId + " cannot be deleted because it has an voting session opened");
-        }
+        verifyIfPautaHasVotingSessionOpen(pauta, String.format("Pauta with ID %s cannot be deleted because it has an voting session opened", pautaId));
         pautaQueryService.delete(pauta);
         log.info("Pauta with ID {} deleted successfully", pautaId);
+    }
+
+    private static void verifyIfPautaHasVotingSessionOpen(Pauta pauta, String message) {
+        String pautaId = String.valueOf(pauta.getId());
+        if (pauta.getVotingSession() != null) {
+            log.error(message, pautaId);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+        }
     }
 }
