@@ -33,4 +33,8 @@ public class PautaQueryService {
     public Page<Pauta> findAll(Pageable pageable) {
         return pautaRepository.findAll(pageable);
     }
+
+    public void delete(Pauta pauta) {
+        pautaRepository.delete(pauta);
+    }
 }

@@ -5,6 +5,7 @@ import com.votacao.desafio.dto.PautaResponse;
 import com.votacao.desafio.dto.VotingResultResponse;
 import com.votacao.desafio.entity.Pauta;
 import com.votacao.desafio.entity.VotingSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -81,5 +82,30 @@ public class PautaManagementService {
         }
 
         return buildVotingResultResponse(pauta, votingSession);
+    }
+
+    public PautaResponse updatePauta(Long pautaId, @Valid PautaRequest pautaRequest) {
+        Pauta pauta = pautaQueryService.getPautaById(pautaId);
+
+        if (pauta.getVotingSession() != null) {
+            log.error("Pauta with ID {} cannot be updated because it has an voting session opened", pautaId);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pauta with ID " + pautaId + " cannot be updated because it has an voting session opened");
+        }
+
+        pauta.setTitle(pautaRequest.getTitle());
+        pauta.setDescription(pautaRequest.getDescription());
+
+        Pauta updatedPauta = pautaQueryService.save(pauta);
+        return PautaResponse.mapToPautaResponse(updatedPauta);
+    }
+
+    public void deletePauta(Long pautaId) {
+        Pauta pauta = pautaQueryService.getPautaById(pautaId);
+        if (pauta.getVotingSession() != null) {
+            log.error("Pauta with ID {} cannot be deleted because it has an voting session opened", pautaId);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pauta with ID " + pautaId + " cannot be deleted because it has an voting session opened");
+        }
+        pautaQueryService.delete(pauta);
+        log.info("Pauta with ID {} deleted successfully", pautaId);
     }
 }

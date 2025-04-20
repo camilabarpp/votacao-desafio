@@ -40,6 +40,18 @@ public class PautaController implements PautaSwagger {
         return ResponseEntity.ok(pauta);
     }
 
+    @PutMapping("{pautaId}")
+    public ResponseEntity<PautaResponse> updatePauta(@PathVariable Long pautaId, @RequestBody @Valid PautaRequest pautaRequest) {
+        PautaResponse pautaResponse = pautaManagementService.updatePauta(pautaId, pautaRequest);
+        return ResponseEntity.ok(pautaResponse);
+    }
+
+    @DeleteMapping("{pautaId}")
+    public ResponseEntity<Void> deletePauta(@PathVariable Long pautaId) {
+        pautaManagementService.deletePauta(pautaId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{pautaId}/resultado")
     public ResponseEntity<VotingResultResponse> getVotingResult(@PathVariable Long pautaId) {
         VotingResultResponse votingResult = pautaManagementService.getVotingResult(pautaId);

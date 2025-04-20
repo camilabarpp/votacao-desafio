@@ -35,6 +35,11 @@ public class VotingSessionService {
 
     public VotingSessionResponse openVotingSessionByPautaId(Long pautaId, Integer votingSessionDurationInMinutes) {
         log.info("Opening voting session for Pauta with ID: {}", pautaId);
+        if (votingSessionDurationInMinutes < 1) {
+            log.error("Invalid voting session duration: {}", votingSessionDurationInMinutes);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Voting session duration must be at least 1 minute");
+        }
+
         Pauta pauta = pautaService.getPautaById(pautaId);
 
         if (pauta.getVotingSession() != null) {
@@ -100,6 +105,11 @@ public class VotingSessionService {
 
     @Transactional
     public VotingSessionResponse updateVotingSession(Long sessionId, Integer votingSessionDurationInMinutes) {
+        if (votingSessionDurationInMinutes < 1) {
+            log.error("Invalid voting session duration: {}", votingSessionDurationInMinutes);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Voting session duration must be at least 1 minute");
+        }
+
         VotingSession session = findById(sessionId);
 
         if (VotingSession.VotingSessionStatus.CLOSED.equals(session.getVotingSessionStatus())) {
@@ -111,7 +121,7 @@ public class VotingSessionService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot update a session that already has votes");
         }
 
-        LocalDateTime newEndTime = session.getVotingSessionEndedAt().plusMinutes(votingSessionDurationInMinutes);
+        LocalDateTime newEndTime = session.getVotingSessionStartedAt().plusMinutes(votingSessionDurationInMinutes);
         session.setVotingSessionEndedAt(newEndTime);
 
         VotingSession updatedSession = votingSessionRepository.save(session);
