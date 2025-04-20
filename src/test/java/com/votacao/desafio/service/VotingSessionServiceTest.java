@@ -471,4 +471,74 @@ class VotingSessionServiceTest {
         verify(votingSessionRepository).findById(sessionId);
         verifyNoMoreInteractions(votingSessionRepository);
     }
+
+    @Test
+    @DisplayName("Should delete voting session successfully")
+    void shouldDeleteVotingSessionSuccessfully() {
+        Long sessionId = 1L;
+        when(votingSessionRepository.findById(sessionId)).thenReturn(Optional.of(votingSession));
+        doNothing().when(votingSessionRepository).delete(votingSession);
+
+        votingSessionService.deleteVotingSession(sessionId);
+
+        verify(votingSessionRepository).findById(sessionId);
+        verify(votingSessionRepository).delete(votingSession);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when trying to delete a closed session")
+    void shouldThrowExceptionWhenDeletingClosedSession() {
+        Long sessionId = 1L;
+        votingSession.setId(sessionId);
+        votingSession.setVotingSessionStartedAt(LocalDateTime.now().minusMinutes(1));
+        votingSession.setVotingSessionEndedAt(LocalDateTime.now());
+
+        when(votingSessionRepository.findById(sessionId)).thenReturn(Optional.of(votingSession));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                votingSessionService.deleteVotingSession(sessionId)
+        );
+
+        assertEquals("Cannot delete a closed session", exception.getReason());
+        assertEquals(409, exception.getStatusCode().value());
+
+        verify(votingSessionRepository).findById(sessionId);
+        verify(votingSessionRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when trying to delete a session with votes")
+    void shouldThrowExceptionWhenDeletingSessionWithVotes() {
+        Long sessionId = 1L;
+        votingSession.setId(sessionId);
+        votingSession.setVotes(List.of(Vote.builder().id(1L).build()));
+        when(votingSessionRepository.findById(1L)).thenReturn(Optional.of(votingSession));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                votingSessionService.deleteVotingSession(sessionId)
+        );
+
+        assertEquals("Cannot delete a session that has votes", exception.getReason());
+        assertEquals(409, exception.getStatusCode().value());
+
+        verify(votingSessionRepository, times(1)).findById(1L);
+        verify(votingSessionRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when session is not found")
+    void shouldThrowExceptionWhenSessionNotFound() {
+        Long sessionId = 999L;
+        when(votingSessionRepository.findById(sessionId)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                votingSessionService.deleteVotingSession(sessionId)
+        );
+
+        assertEquals("Voting Session not found", exception.getReason());
+        assertEquals(404, exception.getStatusCode().value());
+
+        verify(votingSessionRepository).findById(sessionId);
+        verify(votingSessionRepository, never()).delete(any());
+    }
 }
