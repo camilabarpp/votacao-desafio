@@ -207,7 +207,7 @@ class PautaManagementServiceTest {
     }
 
     @Test
-    @DisplayName("Should throw exception when pauta is not found")
+    @DisplayName("Should throw exception when pauta does not have voting session")
     void getVotingResult_WithPautaWithoutSession_ShouldThrowException() {
         Long pautaId = 1L;
         savedPauta.setVotingSession(null);
@@ -223,5 +223,65 @@ class PautaManagementServiceTest {
                 exception.getReason());
         verify(pautaQueryService).getPautaById(pautaId);
         verify(votingSessionService).getVotingSessionByPautaId(pautaId);
+    }
+
+    @Test
+    @DisplayName("Should update pauta successfully")
+    void shouldUpdatePautaSuccessfully() {
+        when(pautaQueryService.getPautaById(1L)).thenReturn(savedPauta);
+        when(pautaQueryService.save(any(Pauta.class))).thenReturn(savedPauta);
+
+        PautaResponse result = pautaManagementService.updatePauta(1L, pautaRequest);
+
+        assertNotNull(result);
+        assertEquals(savedPauta.getId(), result.getId());
+        assertEquals(pautaRequest.getTitle(), result.getTitle());
+        assertEquals(pautaRequest.getDescription(), result.getDescription());
+        verify(pautaQueryService).getPautaById(1L);
+        verify(pautaQueryService).save(any(Pauta.class));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when updating pauta with voting session opened")
+    void shouldThrowExceptionWhenUpdatingPautaWithVotingSessionOpened() {
+        savedPauta.setVotingSession(votingSession);
+        when(pautaQueryService.getPautaById(1L)).thenReturn(savedPauta);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                pautaManagementService.updatePauta(1L, pautaRequest)
+        );
+
+        assertEquals("400 BAD_REQUEST \"Pauta with ID 1 cannot be updated because it has an voting session opened\"",
+                exception.getMessage());
+        verify(pautaQueryService).getPautaById(1L);
+        verify(pautaQueryService, never()).save(any(Pauta.class));
+    }
+
+    @Test
+    @DisplayName("Should delete pauta successfully")
+    void shouldDeletePautaSuccessfully() {
+        when(pautaQueryService.getPautaById(1L)).thenReturn(savedPauta);
+        doNothing().when(pautaQueryService).delete(any(Pauta.class));
+
+        assertDoesNotThrow(() -> pautaManagementService.deletePauta(1L));
+
+        verify(pautaQueryService).getPautaById(1L);
+        verify(pautaQueryService).delete(savedPauta);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when deleting pauta with voting session opened")
+    void shouldThrowExceptionWhenDeletingPautaWithVotingSessionOpened() {
+        savedPauta.setVotingSession(votingSession);
+        when(pautaQueryService.getPautaById(1L)).thenReturn(savedPauta);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                pautaManagementService.deletePauta(1L)
+        );
+
+        assertEquals("400 BAD_REQUEST \"Pauta with ID 1 cannot be deleted because it has an voting session opened\"",
+                exception.getMessage());
+        verify(pautaQueryService).getPautaById(1L);
+        verify(pautaQueryService, never()).delete(any(Pauta.class));
     }
 }
