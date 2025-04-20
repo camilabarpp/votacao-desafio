@@ -148,4 +148,19 @@ public class VotingSessionService {
         log.info("Voting session closed successfully: {}", votingSession.getId());
         return mapToVotingSessionResponse(votingSession);
     }
+
+    public void deleteVotingSession(Long sessaoId) {
+        VotingSession votingSession = findById(sessaoId);
+
+        if (VotingSession.VotingSessionStatus.CLOSED.equals(votingSession.getVotingSessionStatus())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot delete a closed session");
+        }
+
+        if (hasVotes(votingSession)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot delete a session that has votes");
+        }
+
+        votingSessionRepository.delete(votingSession);
+        log.info("Voting session deleted successfully: {}", sessaoId);
+    }
 }

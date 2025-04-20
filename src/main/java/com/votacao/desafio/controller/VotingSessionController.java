@@ -48,4 +48,10 @@ public class VotingSessionController implements VotingSessionSwagger {
         VotingSessionResponse closedSession = votingSessionService.closeVotingSession(sessaoId);
         return ResponseEntity.ok(closedSession);
     }
+
+    @DeleteMapping("/{sessaoId}")
+    public ResponseEntity<Void> deleteVotingSession(@PathVariable Long sessaoId) {
+        votingSessionService.deleteVotingSession(sessaoId);
+        return ResponseEntity.noContent().build();
+    }
 }
