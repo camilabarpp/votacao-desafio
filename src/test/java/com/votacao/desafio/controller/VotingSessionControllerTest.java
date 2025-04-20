@@ -323,4 +323,67 @@ class VotingSessionControllerTest {
                 .andExpect(jsonPath("$.content").isNotEmpty())
                 .andExpect(jsonPath("$.content.[0].votingSessionStatus").value("CLOSED"));
     }
+
+    @Test
+    @DisplayName("Should delete a voting session")
+    @Sql(scripts = {
+            "/test-scripts/cleanup.sql",
+            "/test-scripts/setup-pautas.sql",
+            "/test-scripts/setup-associados.sql",
+            "/test-scripts/setup-sessao-votacao.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/test-scripts/cleanup.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void shouldDeleteVotingSession() throws Exception {
+        mockMvc.perform(delete("/sessoes/4")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when trying to delete a voting session with invalid ID")
+    void shouldThrowExceptionWhenTryingToDeleteVotingSessionWithInvalidId() throws Exception {
+        mockMvc.perform(delete("/sessoes/999")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Voting Session not found"));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when trying to delete a voting session with votes")
+    @Sql(scripts = {
+            "/test-scripts/cleanup.sql",
+            "/test-scripts/setup-pautas.sql",
+            "/test-scripts/setup-associados.sql",
+            "/test-scripts/setup-sessao-votacao.sql",
+            "/test-scripts/setup-votos.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/test-scripts/cleanup.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void shouldThrowExceptionWhenTryingToDeleteVotingSessionWithVotes() throws Exception {
+        mockMvc.perform(delete("/sessoes/4")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Cannot delete a session that has votes"));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when trying to delete a closed voting session")
+    @Sql(scripts = {
+            "/test-scripts/cleanup.sql",
+            "/test-scripts/setup-pautas.sql",
+            "/test-scripts/setup-associados.sql",
+            "/test-scripts/setup-sessao-votacao.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/test-scripts/cleanup.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void shouldThrowExceptionWhenTryingToDeleteClosedVotingSession() throws Exception {
+        mockMvc.perform(delete("/sessoes/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Cannot delete a closed session"));
+    }
 }
