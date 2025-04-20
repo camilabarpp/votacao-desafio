@@ -2,9 +2,10 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.4'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'jacoco'
 }
 
-group = 'com.partidacerta'
+group = 'com.votacao.desafio.'
 version = '0.0.1-SNAPSHOT'
 
 java {
@@ -41,6 +42,70 @@ dependencies {
     testImplementation 'com.h2database:h2'
 }
 
-tasks.named('test') {
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+test {
+    finalizedBy jacocoTestReport
     useJUnitPlatform()
 }
+
+jacocoTestReport {
+    reports {
+        xml.required = true
+        csv.required = false
+        html.required = true
+        html.outputLocation = layout.buildDirectory.dir('reports/jacoco')
+    }
+    dependsOn test
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            element = 'CLASS'
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.80
+            }
+            excludes = [
+                    'com.votacao.desafio.common.*',
+                    'com.votacao.desafio.entity.*',
+                    'com.votacao.desafio.dto.*',
+                    'com.votacao.desafio.*Application',
+                    '**/*Request*',
+                    '**/*Response*',
+                    '**/*DTO*'
+            ]
+        }
+
+        rule {
+            element = 'CLASS'
+            includes = ['com.votacao.desafio.service.*']
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.80
+            }
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.90
+            }
+        }
+
+        rule {
+            element = 'CLASS'
+            includes = ['com.votacao.desafio.controller.*']
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.80
+            }
+        }
+    }
+}
+
+check.dependsOn jacocoTestCoverageVerification
