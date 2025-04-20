@@ -1,0 +1,536 @@
+{
+	"info": {
+		"_postman_id": "169da21c-b317-4529-9c7c-a046b663be56",
+		"name": "Votação- Desafio",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20906288",
+		"_collection_link": "https://universal-sunset-367387.postman.co/workspace/AA~6af1fd69-fec8-466b-808d-30fa808127ee/collection/20906288-169da21c-b317-4529-9c7c-a046b663be56?action=share&source=collection_link&creator=20906288"
+	},
+	"item": [
+		{
+			"name": "pauta",
+			"item": [
+				{
+					"name": "Listar pautas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/votacao/pautas?status={{status}}&page=0&size=10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"votacao",
+								"pautas"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "{{status}}"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obter pauta pelo ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/votacao/pautas/{{pautaId}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"votacao",
+								"pautas",
+								"{{pautaId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Criar uma pauta para votação",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Nova Pauta\",\n    \"description\": \"Nova descrição\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/votacao/pautas",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"votacao",
+								"pautas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar pauta",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Nova Pauta atualizada\",\n    \"description\": \"Nova descrição atualizada\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/votacao/pautas/{{pautaId}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"votacao",
+								"pautas",
+								"{{pautaId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar pauta",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/votacao/pautas/{{pautaId}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"votacao",
+								"pautas",
+								"{{pautaId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "sessão de votação",
+			"item": [
+				{
+					"name": "Abrir sessão de votação para uma pauta",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/votacao/pauta/6/sessao?votingSessionDurationInMinutes={{votingSessionDurationInMinutes}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"votacao",
+								"pauta",
+								"6",
+								"sessao"
+							],
+							"query": [
+								{
+									"key": "votingSessionDurationInMinutes",
+									"value": "{{votingSessionDurationInMinutes}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Votar em uma sessão de votação",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sessionId\": 1,\n    \"cpf\": \"12345678900\",\n    \"vote\": \"YES\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/v1/pauta/{{pautaId}}/voto",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"v1",
+								"pauta",
+								"{{pautaId}}",
+								"voto"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar sessões de votações",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/votacao/sessoes?votingSessionStatus={{votingSessionStatus}}&page=0&size=10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"votacao",
+								"sessoes"
+							],
+							"query": [
+								{
+									"key": "votingSessionStatus",
+									"value": "{{votingSessionStatus}}"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obter uma sessão de votação pelo ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/votacao/sessoes/{{sessaoId}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"votacao",
+								"sessoes",
+								"{{sessaoId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar uma sessão de votação",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/votacao/sessoes/{{sessaoId}}?votingSessionDurationInMinutes={{votingSessionDurationInMinutes}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"votacao",
+								"sessoes",
+								"{{sessaoId}}"
+							],
+							"query": [
+								{
+									"key": "votingSessionDurationInMinutes",
+									"value": "{{votingSessionDurationInMinutes}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Fechar uma sessão de votação",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/votacao/sessoes/{{sessaoId}}/fechar",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"votacao",
+								"sessoes",
+								"{{sessaoId}}",
+								"fechar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar uma sessão de votação",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/votacao/sessoes/{{sessaoId}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"votacao",
+								"sessoes",
+								"{{sessaoId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "resultado",
+			"item": [
+				{
+					"name": "Obter resulltado de uma pauta",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/votacao/pautas/{{pautaId}}/resultado",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"votacao",
+								"pautas",
+								"{{pautaId}}",
+								"resultado"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "associados",
+			"item": [
+				{
+					"name": "Listar associados",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/votacao/associados?page=0&size=10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"votacao",
+								"associados"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obter um associado pelo ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/votacao/associados/{{associateId}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"votacao",
+								"associados",
+								"{{associateId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Criar um associado",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Novo Nome\",\n    \"cpf\": \"66524173082\",\n    \"email\": \"email@mail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/votacao/associados",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"votacao",
+								"associados"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Editar um associado",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Novo Nome\",\n    \"cpf\": \"66524173082\",\n    \"email\": \"email@mail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/votacao/associados/{{associateId}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"votacao",
+								"associados",
+								"{{associateId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar associado",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/votacao/associados/{{associateId}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"votacao",
+								"associados",
+								"{{associateId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

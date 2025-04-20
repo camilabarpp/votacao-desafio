@@ -43,6 +43,7 @@ A aplicação estará disponível em: `http://localhost:8080/api/v1/votacao`
 
 A documentação completa da API está disponível através do Swagger UI:
 - URL: `http://localhost:8080/api/v1/votacao/swagger-ui/index.html#/`
+- Collection: Arquivo com todas as requisições: `Votação- Desafio.postman_collection.json`
 
 ## 🔍 Endpoints Principais
 
