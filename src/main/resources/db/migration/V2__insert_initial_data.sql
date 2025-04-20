@@ -20,7 +20,7 @@ VALUES ('Reforma do Estatuto Social', 'Discussão sobre as alterações proposta
        ('Contratação de Empresa de Segurança',
         'Avaliação das propostas recebidas para o serviço de segurança patrimonial.');
 
-INSERT INTO sessao_votos (pauta_id, data_inicio, data_fim)
+INSERT INTO sessao_votacao (pauta_id, data_inicio, data_fim)
 VALUES (1, '2025-01-18T01:06:55.127154', '2025-01-30T10:26:55.12717'),
        (2, '2025-02-15T09:00:00.000000', '2025-02-28T23:59:59.999999'),
        (3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '7 days'),

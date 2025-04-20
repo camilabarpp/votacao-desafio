@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 @Entity
 @Builder
-@Table(name = "sessao_votos")
+@Table(name = "sessao_votacao")
 @EntityListeners(AuditingEntityListener.class)
 @AllArgsConstructor
 @NoArgsConstructor

@@ -15,7 +15,7 @@ CREATE TABLE pautas
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE sessao_votos
+CREATE TABLE sessao_votacao
 (
     id          SERIAL PRIMARY KEY,
     pauta_id    INTEGER NOT NULL REFERENCES pautas (id),
@@ -31,7 +31,7 @@ CREATE TABLE votos
     associado_id INTEGER    NOT NULL,
     opcao_voto   VARCHAR(3) NOT NULL CHECK (opcao_voto IN ('YES', 'NO')),
     data_voto    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_sessao FOREIGN KEY (sessao_id) REFERENCES sessao_votos (id) ON DELETE CASCADE,
+    CONSTRAINT fk_sessao FOREIGN KEY (sessao_id) REFERENCES sessao_votacao (id) ON DELETE CASCADE,
     CONSTRAINT fk_associado FOREIGN KEY (associado_id) REFERENCES associados (id) ON DELETE CASCADE,
     CONSTRAINT unique_voto UNIQUE (sessao_id, associado_id)
 );
@@ -73,7 +73,7 @@ SELECT json_build_object(
                                   )
        ) AS resultado_json
 FROM pautas p
-         JOIN sessao_votos sv ON p.id = sv.pauta_id;
+         JOIN sessao_votacao sv ON p.id = sv.pauta_id;
 
 -- Função para registrar voto e retornar resultado JSON (verificando se a sessão está aberta dinamicamente)
 CREATE OR REPLACE FUNCTION registrar_voto(
@@ -89,7 +89,7 @@ BEGIN
     -- Verificar se existe uma sessão de votação aberta para a pauta (calculado dinamicamente)
     SELECT id
     INTO v_sessao_id
-    FROM sessao_votos
+    FROM sessao_votacao
     WHERE pauta_id = p_pauta_id
       AND data_inicio <= CURRENT_TIMESTAMP
       AND (data_fim IS NULL OR data_fim > CURRENT_TIMESTAMP);
@@ -132,7 +132,7 @@ BEGIN
                sv.pauta_id,
                sv.data_inicio,
                sv.data_fim
-        FROM sessao_votos sv
+        FROM sessao_votacao sv
         WHERE sv.data_inicio <= CURRENT_TIMESTAMP
           AND (sv.data_fim IS NULL OR sv.data_fim > CURRENT_TIMESTAMP);
 END;
