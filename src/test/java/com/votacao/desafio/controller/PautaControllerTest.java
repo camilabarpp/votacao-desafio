@@ -3,25 +3,20 @@ package com.votacao.desafio.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.votacao.desafio.dto.*;
-import com.votacao.desafio.entity.Vote;
-import com.votacao.desafio.entity.VotingSession;
+import com.votacao.desafio.dto.PautaRequest;
+import com.votacao.desafio.dto.PautaResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.is;
@@ -33,6 +28,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @SpringBootTest
 @ActiveProfiles("test")
+@Sql(scripts = "/test-scripts/setup-pautas.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class PautaControllerTest {
 
     @Autowired
@@ -61,36 +58,10 @@ class PautaControllerTest {
                 .description("Descrição da pauta de teste")
                 .createdAt(LocalDateTime.now())
                 .build();
-
-        VoteResponse voteResponse1 = new VoteResponse();
-        voteResponse1.setId(1L);
-        voteResponse1.setAssociateName("João Silva");
-        voteResponse1.setVotedOption(Vote.VoteOption.NO.name());
-
-        VoteResponse voteResponse2 = new VoteResponse();
-        voteResponse2.setId(2L);
-        voteResponse2.setAssociateName("Maria Santos");
-        voteResponse2.setVotedOption(Vote.VoteOption.YES.name());
-
-        VoteResponse voteResponse3 = new VoteResponse();
-        voteResponse3.setId(3L);
-        voteResponse3.setAssociateName("Pedro Oliveira");
-        voteResponse3.setVotedOption(Vote.VoteOption.NO.name());
-
-        VotingSessionResponse votingSessionResponse = new VotingSessionResponse();
-        votingSessionResponse.setId(1L);
-        votingSessionResponse.setVotingSessionStartedAt(LocalDateTime.now());
-        votingSessionResponse.setVotingSessionEndedAt(LocalDateTime.now().plusMinutes(10));
-        votingSessionResponse.setVotingSessionStatus("OPEN");
-        votingSessionResponse.setVotes(List.of(voteResponse1, voteResponse2, voteResponse3));
-
-        pautaResponse.setVotingSession(votingSessionResponse);
     }
 
     @Test
-    @DisplayName("Deve criar uma pauta com sucesso")
-    @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    @DisplayName("Should create a pauta successfully")
     void shouldCreatePautaSuccessfully() throws Exception {
         mockMvc.perform(post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -103,9 +74,7 @@ class PautaControllerTest {
     }
 
     @Test
-    @DisplayName("Deve retornar uma pauta por ID")
-    @Sql(scripts = "/test-scripts/setup-pautas.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    @DisplayName("Should get all pautas successfully")
     void shouldGetPautaById() throws Exception {
         Long pautaId = 1L;
 
@@ -117,7 +86,7 @@ class PautaControllerTest {
     }
 
     @Test
-    @DisplayName("Deve retornar erro 404 ao buscar pauta inexistente")
+    @DisplayName("Should return not found for invalid pauta id")
     void shouldReturnNotFoundForInvalidPautaId() throws Exception {
         Long invalidPautaId = 999L;
 
@@ -127,9 +96,7 @@ class PautaControllerTest {
     }
 
     @Test
-    @DisplayName("Deve listar todas as pautas paginadas")
-    @Sql(scripts = "/test-scripts/setup-pautas.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    @DisplayName("Should list all pautas paginated successfully")
     void shouldListAllPautas() throws Exception {
         mockMvc.perform(get(BASE_URL)
                         .param("page", "0")
@@ -143,9 +110,7 @@ class PautaControllerTest {
     }
 
     @Test
-    @DisplayName("Deve listar pautas filtradas por status")
-    @Sql(scripts = "/test-scripts/setup-pautas.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    @DisplayName("Should list pautas by status")
     void shouldListPautasByStatus() throws Exception {
         String status = "CREATED";
 
@@ -160,7 +125,7 @@ class PautaControllerTest {
     }
 
     @Test
-    @DisplayName("Deve retornar o resultado da votação de uma pauta")
+    @DisplayName("Should get voting session result successfully")
     @Sql(scripts = "/test-scripts/setup-associados.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(scripts = "/test-scripts/setup-pautas.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(scripts = "/test-scripts/setup-sessao-votacao.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
