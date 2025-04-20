@@ -20,8 +20,7 @@ import java.time.LocalDateTime;
 
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @DisplayName("PautaControllerTest")
@@ -145,5 +144,81 @@ class PautaControllerTest {
                 .andExpect(jsonPath("$.votingResult.percentageYes").exists())
                 .andExpect(jsonPath("$.votingResult.percentageNo").isNumber())
                 .andExpect(jsonPath("$.votingResult.result").exists());
+    }
+
+    @Test
+    @DisplayName("Should update a pauta successfully")
+    void shouldUpdatePautaSuccessfully() throws Exception {
+        pautaRequest.setTitle("Pauta Atualizada");
+        mockMvc.perform(put(BASE_URL + "/3")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(pautaRequest)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value("3"))
+                .andExpect(jsonPath("$.title").value("Pauta Atualizada"))
+                .andExpect(jsonPath("$.description").value(pautaResponse.getDescription()));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when updating a pauta with voting session opened")
+    @Sql(scripts = {
+            "/test-scripts/setup-pautas.sql",
+            "/test-scripts/setup-sessao-votacao.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void shouldThrowExceptionWhenUpdatingPautaWithVotingSessionOpened() throws Exception {
+        pautaRequest.setTitle("Pauta Atualizada");
+        mockMvc.perform(put(BASE_URL + "/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(pautaRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Pauta with ID 1 cannot be updated because it has an voting session opened"));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when updating a non-existent pauta")
+    void shouldThrowExceptionWhenUpdatingNonExistentPauta() throws Exception {
+        pautaRequest.setTitle("Pauta Atualizada");
+        mockMvc.perform(put(BASE_URL + "/999")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(pautaRequest)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Pauta not found with ID: 999"));
+    }
+
+    @Test
+    @DisplayName("Should delete a pauta successfully")
+    void shouldDeletePautaSuccessfully() throws Exception {
+        mockMvc.perform(delete(BASE_URL + "/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when deleting a pauta with voting session opened")
+    @Sql(scripts = {
+            "/test-scripts/setup-pautas.sql",
+            "/test-scripts/setup-sessao-votacao.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void shouldThrowExceptionWhenDeletingPautaWithVotingSessionOpened() throws Exception {
+        mockMvc.perform(delete(BASE_URL + "/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Pauta with ID 1 cannot be deleted because it has an voting session opened"));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when deleting a non-existent pauta")
+    void shouldThrowExceptionWhenDeletingNonExistentPauta() throws Exception {
+        mockMvc.perform(delete(BASE_URL + "/999")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Pauta not found with ID: 999"));
     }
 }
