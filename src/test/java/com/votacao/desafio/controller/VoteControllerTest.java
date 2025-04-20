@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.votacao.desafio.dto.VoteRequest;
-import com.votacao.desafio.dto.VotingResultResponse;
 import com.votacao.desafio.dto.VotingSessionResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -28,16 +26,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @SpringBootTest
 @ActiveProfiles("test")
-@SqlGroup({
-        @Sql(scripts = {
-                "/test-scripts/cleanup.sql",
-                "/test-scripts/setup-associados.sql",
-                "/test-scripts/setup-pautas.sql",
-                "/test-scripts/setup-sessao-votacao.sql"
-        }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
-        @Sql(scripts = "/test-scripts/cleanup.sql",
-                executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-})
+@Sql(scripts = {
+        "/test-scripts/cleanup.sql",
+        "/test-scripts/setup-associados.sql",
+        "/test-scripts/setup-pautas.sql",
+        "/test-scripts/setup-sessao-votacao.sql"
+}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "/test-scripts/cleanup.sql",
+        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class VoteControllerTest {
 
     @Autowired
@@ -46,7 +42,6 @@ class VoteControllerTest {
     private final String BASE_URL = "/votos/pauta";
     private ObjectMapper objectMapper;
     private VoteRequest voteRequest;
-    private VotingResultResponse votingResultResponse;
 
     @BeforeEach
     void setup() {
@@ -61,9 +56,6 @@ class VoteControllerTest {
         VotingSessionResponse votingSessionResponse = new VotingSessionResponse();
         votingSessionResponse.setId(1L);
         votingSessionResponse.setVotes(List.of(builder().associateId(1L).votedOption("YES").build()));
-
-        votingResultResponse = new VotingResultResponse();
-        votingResultResponse.setVotingSession(votingSessionResponse);
     }
 
 
@@ -71,7 +63,7 @@ class VoteControllerTest {
     @Test
     @DisplayName("Should register a vote successfully")
     void shouldRegisterVoteSuccessfully() throws Exception {
-        mockMvc.perform(post(BASE_URL + "/1")
+        mockMvc.perform(post(BASE_URL + "/4")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(voteRequest)))
                 .andExpect(status().isAccepted())

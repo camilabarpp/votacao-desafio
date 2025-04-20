@@ -1,8 +1,5 @@
 package com.votacao.desafio.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,15 +30,10 @@ class VotingSessionControllerTest {
     private MockMvc mockMvc;
 
     private final String BASE_URL = "/sessoes/";
-    private ObjectMapper objectMapper;
     private Integer votingSessionDuration;
 
     @BeforeEach
     void setup() {
-        objectMapper = new ObjectMapper()
-                .registerModule(new JavaTimeModule())
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-
         votingSessionDuration = 30;
     }
 
