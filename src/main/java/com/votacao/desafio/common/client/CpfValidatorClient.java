@@ -1,5 +1,6 @@
 package com.votacao.desafio.common.client;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -9,6 +10,7 @@ import java.util.Random;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class CpfValidatorClient {
 
     private final Random random;
@@ -16,11 +18,6 @@ public class CpfValidatorClient {
     public CpfValidatorClient() {
         this(new Random());
     }
-
-    public CpfValidatorClient(Random random) {
-        this.random = random;
-    }
-
 
     public enum VotingPermission {
         ABLE_TO_VOTE,
