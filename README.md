@@ -49,7 +49,7 @@ A documentação completa da API está disponível através do Swagger UI:
 
 - `POST /api/v1/votacao/pautas` - Criar nova pauta
 - `POST /api/v1/votacao/pauta/{pautaId}/sessao` - Abrir sessão de votação
-- `POST /votos/pauta/{pautaId}/voto` - Registrar voto
+- `POST /votos/pauta/{{pautaId}}` - Registrar voto
 - `GET /pautas/{pautaId}/resultado` - Consultar resultado da votação
 
 ## 🧪 Testes
