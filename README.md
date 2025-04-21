@@ -48,9 +48,9 @@ A documentação completa da API está disponível através do Swagger UI:
 ## 🔍 Endpoints Principais
 
 - `POST /api/v1/votacao/pautas` - Criar nova pauta
-- `POST /api/v1/votacao/pauta/{pautaId}/sessao` - Abrir sessão de votação
-- `POST /votos/pauta/{{pautaId}}` - Registrar voto
-- `GET /pautas/{pautaId}/resultado` - Consultar resultado da votação
+- `POST /api/v1/votacao/pauta/{pautaId}/sessao?votingSessionDurationInMinutes={{votingSessionDurationInMinutes}}` - Abrir sessão de votação
+- `POST /api/v1/votos/pauta/{{pautaId}}` - Registrar voto
+- `GET  /api/v1/pautas/{pautaId}/resultado` - Consultar resultado da votação
 
 ## 🧪 Testes
 
