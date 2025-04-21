@@ -1,5 +1,6 @@
 package com.votacao.desafio.service;
 
+import com.votacao.desafio.common.client.CpfValidatorClient;
 import com.votacao.desafio.dto.VoteRequest;
 import com.votacao.desafio.dto.VotingResultResponse;
 import com.votacao.desafio.entity.Associate;
@@ -26,7 +27,7 @@ public class VoteService {
     private final VotingSessionService votingSessionService;
     private final AssociateService associateService;
     private final VoteRepository voteRepository;
-    private final CpfValidationService cpfValidationService;
+    private final CpfValidatorClient cpfValidatorClient;
 
     @Transactional
     public VotingResultResponse registerVote(Long pautaId, VoteRequest voteRequest) {
@@ -41,7 +42,7 @@ public class VoteService {
         VotingSession votingSession = votingSessionService.findById(pauta.getVotingSession().getId());
         String associateCpf = voteRequest.getCpf();
 
-        if (cpfValidationService.validateCpf(associateCpf).equals(CpfValidationService.VotingPermission.UNABLE_TO_VOTE)) {
+        if (cpfValidatorClient.validateCpf(associateCpf).equals(CpfValidatorClient.VotingPermission.UNABLE_TO_VOTE)) {
             log.error("Invalid CPF {}", associateCpf);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid CPF " + associateCpf);
         }

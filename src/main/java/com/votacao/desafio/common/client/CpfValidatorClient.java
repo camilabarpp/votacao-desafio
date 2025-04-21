@@ -1,22 +1,33 @@
-package com.votacao.desafio.service;
+package com.votacao.desafio.common.client;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Random;
 
 @Slf4j
-@Service
-public class CpfValidationService {
+@Component
+public class CpfValidatorClient {
 
-    private static final int DELAY_SIMULACAO = 100;
+    private final Random random;
+
+    public CpfValidatorClient() {
+        this(new Random());
+    }
+
+    public CpfValidatorClient(Random random) {
+        this.random = random;
+    }
+
 
     public enum VotingPermission {
         ABLE_TO_VOTE,
         UNABLE_TO_VOTE
     }
+
+    private static final int DELAY_SIMULACAO = 100;
 
     /**
      * Simula integração com API externa de validação de CPF.
@@ -27,18 +38,23 @@ public class CpfValidationService {
      * @throws ResponseStatusException (400) se o CPF for inválido
      */
     public VotingPermission validateCpf(String cpf) {
-        log.info("Validando CPF: {}", cpf);
-
-        delayForTesting();
+        log.info("Verifying CPF: {}", cpf);
 
         if (!isValidCpf(cpf)) {
-            log.error("CPF inválido: {}", cpf);
+            log.error("Invalid CPF: {}", cpf);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CPF is invalid");
         }
 
-        VotingPermission status = new Random().nextBoolean()
+        delayForTesting();
+
+        VotingPermission status = random.nextBoolean()
                 ? VotingPermission.ABLE_TO_VOTE
                 : VotingPermission.UNABLE_TO_VOTE;
+
+        if (VotingPermission.UNABLE_TO_VOTE.equals(status)) {
+            log.error("Invalid CPF: {}", cpf);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CPF is invalid");
+        }
 
         log.info("CPF analyzed: {} - Status: {}", cpf, status);
         return status;
@@ -52,7 +68,7 @@ public class CpfValidationService {
         }
     }
 
-    private boolean isValidCpf(String cpf) {
+    public boolean isValidCpf(String cpf) {
         if (cpf == null || cpf.isEmpty()) {
             return false;
         }
@@ -67,28 +83,28 @@ public class CpfValidationService {
             return false;
         }
 
-        int soma = 0;
+        int sum = 0;
         for (int i = 0; i < 9; i++) {
-            soma += Character.getNumericValue(cpf.charAt(i)) * (10 - i);
+            sum += Character.getNumericValue(cpf.charAt(i)) * (10 - i);
         }
-        int primeiroDigito = 11 - (soma % 11);
-        if (primeiroDigito > 9) {
-            primeiroDigito = 0;
+        int fisrtCheckDigit = 11 - (sum % 11);
+        if (fisrtCheckDigit > 9) {
+            fisrtCheckDigit = 0;
         }
 
-        if (Character.getNumericValue(cpf.charAt(9)) != primeiroDigito) {
+        if (Character.getNumericValue(cpf.charAt(9)) != fisrtCheckDigit) {
             return false;
         }
 
-        soma = 0;
+        sum = 0;
         for (int i = 0; i < 10; i++) {
-            soma += Character.getNumericValue(cpf.charAt(i)) * (11 - i);
+            sum += Character.getNumericValue(cpf.charAt(i)) * (11 - i);
         }
-        int segundoDigito = 11 - (soma % 11);
-        if (segundoDigito > 9) {
-            segundoDigito = 0;
+        int secondCheckDigit = 11 - (sum % 11);
+        if (secondCheckDigit > 9) {
+            secondCheckDigit = 0;
         }
 
-        return Character.getNumericValue(cpf.charAt(10)) == segundoDigito;
+        return Character.getNumericValue(cpf.charAt(10)) == secondCheckDigit;
     }
 }
