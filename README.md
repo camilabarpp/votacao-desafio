@@ -64,7 +64,7 @@ A documentação completa da API está disponível através do Swagger UI:
   ./gradlew test jacocoTestReport
 ```
 
-O relatório de cobertura estará disponível em: `build/reports/jacoco/test/html/index.html`
+O relatório de cobertura estará disponível em: `build/reports/jacoco/index.html`
 
 ### Verificando cobertura mínima
 ```bash
