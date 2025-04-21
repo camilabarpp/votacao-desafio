@@ -20,8 +20,8 @@ public class VotingResultResponse {
     private String title;
     private String description;
     private LocalDateTime createdAt;
-    private VotingSessionResponse votingSession;
     private PautaResultResponse votingResult;
+    private VotingSessionResponse votingSession;
 
     @Data
     @Builder
