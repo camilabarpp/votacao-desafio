@@ -3,9 +3,9 @@ package com.votacao.desafio.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.votacao.desafio.common.client.CpfValidatorClient;
 import com.votacao.desafio.dto.VoteRequest;
 import com.votacao.desafio.dto.VotingSessionResponse;
-import com.votacao.desafio.service.CpfValidationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,7 +43,7 @@ class VoteControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private CpfValidationService cpfValidatorService;
+    private CpfValidatorClient cpfValidatorClient;
 
     private final String BASE_URL = "/votos/pauta";
     private ObjectMapper objectMapper;
@@ -68,7 +68,7 @@ class VoteControllerTest {
     @Test
     @DisplayName("Should register a vote successfully")
     void shouldRegisterVoteSuccessfully() throws Exception {
-        when(cpfValidatorService.validateCpf(voteRequest.getCpf())).thenReturn(CpfValidationService.VotingPermission.ABLE_TO_VOTE);
+        when(cpfValidatorClient.validateCpf(voteRequest.getCpf())).thenReturn(CpfValidatorClient.VotingPermission.ABLE_TO_VOTE);
 
         mockMvc.perform(post(BASE_URL + "/4")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -82,7 +82,7 @@ class VoteControllerTest {
     @DisplayName("Should throw an exception when trying to register a vote for an invalid cpf")
     void shouldThrowExceptionWhenTryingToRegisterVoteForInvalidCpf() throws Exception {
         voteRequest.setCpf("12345678901");
-        when(cpfValidatorService.validateCpf(voteRequest.getCpf())).thenReturn(CpfValidationService.VotingPermission.UNABLE_TO_VOTE);
+        when(cpfValidatorClient.validateCpf(voteRequest.getCpf())).thenReturn(CpfValidatorClient.VotingPermission.UNABLE_TO_VOTE);
 
         mockMvc.perform(post(BASE_URL + "/4")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -95,7 +95,7 @@ class VoteControllerTest {
     @Test
     @DisplayName("Should throw an exception when trying to register a vote and the voting session does not open")
     void shouldThrowExceptionWhenTryingToRegisterVoteAndTheVotingSessionDoesNotOpen() throws Exception {
-        when(cpfValidatorService.validateCpf(voteRequest.getCpf())).thenReturn(CpfValidationService.VotingPermission.ABLE_TO_VOTE);
+        when(cpfValidatorClient.validateCpf(voteRequest.getCpf())).thenReturn(CpfValidatorClient.VotingPermission.ABLE_TO_VOTE);
 
         mockMvc.perform(post(BASE_URL + "/3")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -108,7 +108,7 @@ class VoteControllerTest {
     @Test
     @DisplayName("Should throw an exception when trying to register a vote and the voting session is closed")
     void shouldThrowExceptionWhenTryingToRegisterVoteAndTheVotingSessionIsClosed() throws Exception {
-        when(cpfValidatorService.validateCpf(voteRequest.getCpf())).thenReturn(CpfValidationService.VotingPermission.ABLE_TO_VOTE);
+        when(cpfValidatorClient.validateCpf(voteRequest.getCpf())).thenReturn(CpfValidatorClient.VotingPermission.ABLE_TO_VOTE);
 
         mockMvc.perform(post(BASE_URL + "/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -121,7 +121,7 @@ class VoteControllerTest {
     @Test
     @DisplayName("Should throw an exception when trying to register a vote with an invalid vote option")
     void shouldThrowExceptionWhenTryingToRegisterVoteWithInvalidVoteOption() throws Exception {
-        when(cpfValidatorService.validateCpf(voteRequest.getCpf())).thenReturn(CpfValidationService.VotingPermission.ABLE_TO_VOTE);
+        when(cpfValidatorClient.validateCpf(voteRequest.getCpf())).thenReturn(CpfValidatorClient.VotingPermission.ABLE_TO_VOTE);
 
         voteRequest.setVote("INVALID");
         mockMvc.perform(post(BASE_URL + "/5")

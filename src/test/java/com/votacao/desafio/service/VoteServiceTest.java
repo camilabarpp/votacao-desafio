@@ -1,5 +1,6 @@
 package com.votacao.desafio.service;
 
+import com.votacao.desafio.common.client.CpfValidatorClient;
 import com.votacao.desafio.dto.VoteRequest;
 import com.votacao.desafio.dto.VotingResultResponse;
 import com.votacao.desafio.entity.Associate;
@@ -41,7 +42,7 @@ class VoteServiceTest {
     private VoteRepository voteRepository;
 
     @Mock
-    private CpfValidationService cpfValidationService;
+    private CpfValidatorClient cpfValidatorClient;
 
     @InjectMocks
     private VoteService voteService;
@@ -80,7 +81,7 @@ class VoteServiceTest {
     void registerVote_WithValidData_ShouldRegisterVote() {
         when(pautaService.getPautaById(1L)).thenReturn(pauta);
         when(votingSessionService.findById(1L)).thenReturn(votingSession);
-        when(cpfValidationService.validateCpf(cpf)).thenReturn(CpfValidationService.VotingPermission.ABLE_TO_VOTE);
+        when(cpfValidatorClient.validateCpf(cpf)).thenReturn(CpfValidatorClient.VotingPermission.ABLE_TO_VOTE);
         when(associateService.getAssociateByCpf(cpf)).thenReturn(associate);
         when(voteRepository.save(any(Vote.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -111,7 +112,7 @@ class VoteServiceTest {
         pauta.setVotingSession(votingSession);
         when(pautaService.getPautaById(1L)).thenReturn(pauta);
         when(votingSessionService.findById(1L)).thenReturn(votingSession);
-        when(cpfValidationService.validateCpf(cpf)).thenReturn(CpfValidationService.VotingPermission.UNABLE_TO_VOTE);
+        when(cpfValidatorClient.validateCpf(cpf)).thenReturn(CpfValidatorClient.VotingPermission.UNABLE_TO_VOTE);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
                 voteService.registerVote(1L, voteRequest)
@@ -128,7 +129,7 @@ class VoteServiceTest {
         votingSession.setVotingSessionEndedAt(LocalDateTime.now().minusMinutes(1));
         when(pautaService.getPautaById(1L)).thenReturn(pauta);
         when(votingSessionService.findById(1L)).thenReturn(votingSession);
-        when(cpfValidationService.validateCpf(cpf)).thenReturn(CpfValidationService.VotingPermission.ABLE_TO_VOTE);
+        when(cpfValidatorClient.validateCpf(cpf)).thenReturn(CpfValidatorClient.VotingPermission.ABLE_TO_VOTE);
         when(associateService.getAssociateByCpf(cpf)).thenReturn(associate);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
@@ -146,7 +147,7 @@ class VoteServiceTest {
         votingSession.setVotes(Collections.singletonList(Vote.builder().associate(associate).build()));
         when(pautaService.getPautaById(1L)).thenReturn(pauta);
         when(votingSessionService.findById(1L)).thenReturn(votingSession);
-        when(cpfValidationService.validateCpf(cpf)).thenReturn(CpfValidationService.VotingPermission.ABLE_TO_VOTE);
+        when(cpfValidatorClient.validateCpf(cpf)).thenReturn(CpfValidatorClient.VotingPermission.ABLE_TO_VOTE);
         when(associateService.getAssociateByCpf(cpf)).thenReturn(associate);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
