@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "169da21c-b317-4529-9c7c-a046b663be56",
-		"name": "Votação- Desafio",
+		"name": "Votação - Desafio",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "20906288",
 		"_collection_link": "https://universal-sunset-367387.postman.co/workspace/AA~6af1fd69-fec8-466b-808d-30fa808127ee/collection/20906288-169da21c-b317-4529-9c7c-a046b663be56?action=share&source=collection_link&creator=20906288"
@@ -196,7 +196,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"sessionId\": 1,\n    \"cpf\": \"12345678900\",\n    \"vote\": \"YES\"\n}",
+							"raw": "{\n    \"cpf\": \"12345678900\",\n    \"vote\": \"YES\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -204,17 +204,19 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/v1/pauta/{{pautaId}}/voto",
+							"raw": "http://localhost:8080/api/v1/votacao/votos/pauta/{{pautaId}}",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
+								"api",
 								"v1",
+								"votacao",
+								"votos",
 								"pauta",
-								"{{pautaId}}",
-								"voto"
+								"{{pautaId}}"
 							]
 						}
 					},
