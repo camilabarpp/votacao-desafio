@@ -1,0 +1,14 @@
+[
+  {
+      "id":1, //molicar ID
+      "versao":"FLORESTAL 4e(C/Pneus)"
+  },
+  {
+      "id":2,
+      "versao":"TANQUE 3e(C/Pneus)"
+  },
+  {
+      "id":3,
+      "versao":"ROLL-ON ROLL-OF PORTA CONTAINER 3e(CPneus)"
+  }
+] 
